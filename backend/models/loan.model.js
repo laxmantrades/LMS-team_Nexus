@@ -14,7 +14,7 @@ const LoanSchema = new mongoose.Schema(
     notes: { type: String, trim: true },
     fine_snapshot: { type: Number, default: 0 }, // snapshot of fine at time of close, if needed
   },
-  { timestamps: true, collection: "loans" }
+  { timestamps: true, collection: "loans"  }
 );
 
 // Helpful indexes for queries
