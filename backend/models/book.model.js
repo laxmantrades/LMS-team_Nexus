@@ -14,6 +14,6 @@ const BookSchema = new mongoose.Schema(
 );
 
 // Useful for searching by title/author/genre
-BookSchema.index({ title: "text", author: "text", genre: "text" });
+BookSchema.index({ title: "text", author: "text", genre: "text"  });
 
 export default mongoose.model("Book", BookSchema);
