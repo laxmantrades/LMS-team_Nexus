@@ -6,14 +6,14 @@ const BookSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     author: { type: String, required: true, trim: true },
     genre: { type: String, trim: true },
+    bookImage: { type: String, trim: true },
     published_date: { type: Date },
-    available: { type: Number, default: 0, min: 0 }, // count of copies currently available
+    available: { type: Number, default: 0, min: 0 },
     added_on: { type: Date, default: Date.now },
   },
   { timestamps: true, collection: "books" }
 );
 
-// Useful for searching by title/author/genre
-BookSchema.index({ title: "text", author: "text", genre: "text"  });
+BookSchema.index({ title: "text", author: "text", genre: "text" });
 
 export default mongoose.model("Book", BookSchema);
