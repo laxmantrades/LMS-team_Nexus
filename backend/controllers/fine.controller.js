@@ -5,10 +5,9 @@ import Loan from "../models/loan.model.js";
 const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
 // ---- Configurable policy ----
-const BASE_FINE = Number(process.env.FINE_BASE_AMOUNT || 10); // currency units
+const BASE_FINE = Number(process.env.FINE_BASE_AMOUNT || 10); 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-// Days overdue (stops accruing after return_date)
 function daysOverdue(loan) {
   const end = loan.return_date ? new Date(loan.return_date) : new Date();
   const diffDays = Math.floor((end - new Date(loan.due_date)) / DAY_MS);
