@@ -82,7 +82,6 @@ export const getStaff = async (req, res) => {
 };
 
 
-
 export const getStaffById = async (req, res) => {
   try {
     const { id } = req.params;
