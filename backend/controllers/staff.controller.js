@@ -1,11 +1,10 @@
-// controllers/staff.controller.js
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import Staff from "../models/staff.model.js";
 
 const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-// Create new staff member (hash password)
+
 export const createStaff = async (req, res) => {
   try {
     const { full_name, email, password, role, active } = req.body;
@@ -33,7 +32,7 @@ export const createStaff = async (req, res) => {
   }
 };
 
-// Get all staff (filter, pagination)
+
 export const getStaff = async (req, res) => {
   try {
     const { page = 1, limit = 10, q, role, active } = req.query;
@@ -82,7 +81,7 @@ export const getStaff = async (req, res) => {
   }
 };
 
-// Get single staff member by ID
+
 export const getStaffById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,7 +100,7 @@ export const getStaffById = async (req, res) => {
   }
 };
 
-// Update staff (hash new password if provided)
+
 export const updateStaff = async (req, res) => {
   try {
     const { id } = req.params;
@@ -130,7 +129,7 @@ export const updateStaff = async (req, res) => {
   }
 };
 
-// Delete staff
+
 export const deleteStaff = async (req, res) => {
   try {
     const { id } = req.params;
