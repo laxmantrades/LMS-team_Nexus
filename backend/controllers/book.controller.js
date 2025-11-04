@@ -14,16 +14,20 @@ export const createBook = async (req, res, next) => {
 export const listBooks = async (req, res, next) => {
   try {
     const {
-      q, 
+      q,
       author,
       genre,
       bookimage,
       minAvailable,
       maxAvailable,
-      sort = "-createdAt", 
+      sort = "-createdAt",
       page = 1,
       limit = 10,
     } = req.query;
+
+    const pageNumber  = Number(page) || 1;
+    const limitNumber = Number(limit) || 10;
+    const skip        = (pageNumber - 1) * limitNumber;
 
     const filter = {};
 
@@ -36,10 +40,11 @@ export const listBooks = async (req, res, next) => {
       if (maxAvailable) filter.available.$lte = Number(maxAvailable);
     }
 
-   
-
     const [items, total] = await Promise.all([
-      Book.find(filter).sort(sort).skip(skip).limit(Number(limit)),
+      Book.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limitNumber),
       Book.countDocuments(filter),
     ]);
 
@@ -48,15 +53,16 @@ export const listBooks = async (req, res, next) => {
       data: items,
       pagination: {
         total,
-        page: Number(page),
-        pages: Math.ceil(total / Number(limit)) || 1,
-        limit: Number(limit),
+        page: pageNumber,
+        pages: Math.ceil(total / limitNumber) || 1,
+        limit: limitNumber,
       },
     });
   } catch (err) {
     next(err);
   }
 };
+
 export const getBookById = async (req, res, next) => {
   try {
     const book = await Book.findById(req.params.id);
