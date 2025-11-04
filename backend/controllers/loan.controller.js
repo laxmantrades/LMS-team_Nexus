@@ -19,7 +19,6 @@ export const createLoan = async (req, res) => {
       });
     }
 
-    // Validate references
     if (!isObjectId(book_id) || !isObjectId(member_id)) {
       return res.status(400).json({ success: false, message: "Invalid book/member ID" });
     }
@@ -34,12 +33,10 @@ export const createLoan = async (req, res) => {
       return res.status(400).json({ success: false, message: "Book not available" });
     }
 
-    // Optionally check staff
     if (staff_id && !isObjectId(staff_id)) {
       return res.status(400).json({ success: false, message: "Invalid staff ID" });
     }
 
-    // Create loan
     const loan = await Loan.create({
       book_id,
       member_id,
@@ -49,7 +46,6 @@ export const createLoan = async (req, res) => {
       status: ["borrowed"],
     });
 
-    // Decrease available book count
     book.available -= 1;
     await book.save();
 
@@ -86,7 +82,7 @@ export const getLoans = async (req, res) => {
     if (staff_id && isObjectId(staff_id)) filter.staff_id = staff_id;
     if (book_id && isObjectId(book_id)) filter.book_id = book_id;
 
-    // Mark overdue loans dynamically (optional)
+    // Mark overdue loans dynamically
     if (overdue === "true") {
       filter.due_date = { $lt: new Date() };
       filter.return_date = { $exists: false };
@@ -144,7 +140,7 @@ export const getLoanById = async (req, res) => {
   }
 };
 
-// Update loan (e.g. return a book)
+// Update loan
 export const updateLoan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -159,19 +155,17 @@ export const updateLoan = async (req, res) => {
       return res.status(404).json({ success: false, message: "Loan not found" });
     }
 
-    // Handle book return logic
     if (updates.return_date && !loan.return_date) {
       loan.return_date = updates.return_date || new Date();
       loan.status = ["returned"];
 
-      // Increase book availability
       const book = await Book.findById(loan.book_id);
       if (book) {
         book.available += 1;
         await book.save();
       }
     } else {
-      // Other updates (e.g., status, notes)
+      
       if (updates.status) loan.status = updates.status;
       if (updates.notes) loan.notes = updates.notes;
       if (updates.due_date) loan.due_date = updates.due_date;
@@ -187,6 +181,33 @@ export const updateLoan = async (req, res) => {
     res.json({ success: true, data: populated });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Delete loan
+export const deleteLoan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid ID" });
+    }
+
+    const loan = await Loan.findByIdAndDelete(id);
+    if (!loan) {
+      return res.status(404).json({ success: false, message: "Loan not found" });
+    }
+
+    if (!loan.return_date) {
+      const book = await Book.findById(loan.book_id);
+      if (book) {
+        book.available += 1;
+        await book.save();
+      }
+    }
+
+    res.json({ success: true, message: "Loan deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 

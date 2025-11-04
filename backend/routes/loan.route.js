@@ -10,11 +10,11 @@ import {
 
 const router = Router();
 
-// /api/loans
+ /* /api/loans */
 router.get("/", getLoans);
 router.post("/", createLoan);
 
-// /api/loans/:id
+/*  /api/loans/:id */
 router.get("/:id", getLoanById);
 router.patch("/:id", updateLoan);
 router.delete("/:id", deleteLoan);
