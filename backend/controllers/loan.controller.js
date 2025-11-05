@@ -184,6 +184,7 @@ export const updateLoan = async (req, res) => {
   }
 };
 
+
 // Delete loan
 export const deleteLoan = async (req, res) => {
   try {
