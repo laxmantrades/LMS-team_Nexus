@@ -16,5 +16,4 @@ router.post("/login", loginMember);
 // @route   PATCH /api/members/:id/password
 // @desc    Change member password
 router.patch("/:id/password", changeMemberPassword);
-
 export default router;
