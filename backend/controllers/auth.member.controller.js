@@ -15,6 +15,8 @@ const sanitizeMember = (memberDoc) => {
 
 export const registerMember = async (req, res) => {
   try {
+    console.log("hi");
+    
     const { name, email, address, password } = req.body;
 
     if (!name || !email || !address || !password) {

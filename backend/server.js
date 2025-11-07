@@ -9,6 +9,7 @@ import staffRouter from "./routes/staff.route.js";
 import loansRouter from "./routes/loan.route.js";
 import finesRouter from "./routes/fine.route.js";
 import memberAuthRoutes from "./routes/auth.member.route.js";
+import staffAuthRoutes from "./routes/auth.staff.route.js";
 import { configDotenv } from "dotenv";
 
 const app = express();
@@ -24,7 +25,8 @@ app.use("/api/members", membersRouter);
 app.use("/api/books", booksRouter);
 app.use("/api/staff", staffRouter);
 app.use("/api/fines", finesRouter);
-app.use("/api/member/", memberAuthRoutes);
+app.use("/api/auth/member", memberAuthRoutes);
+app.use("/api/auth/staff", staffAuthRoutes);
 
 
 // health check

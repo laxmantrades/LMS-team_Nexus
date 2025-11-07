@@ -4,16 +4,16 @@ import {
   loginMember,
   changeMemberPassword,
 } from "../controllers/auth.member.controller.js";
+import { memberOnly, protect } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
 
-router.post("/register", registerMember);
+router.post("/", registerMember);
 
 
 router.post("/login", loginMember);
 
-// @route   PATCH /api/members/:id/password
-// @desc    Change member password
-router.patch("/:id/password", changeMemberPassword);
+
+router.patch("/:id/password",protect,memberOnly, changeMemberPassword);
 export default router;
