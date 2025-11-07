@@ -22,7 +22,7 @@ const generateToken = (staff) => {
 /**
  * POST /api/auth/staff/create
  * Only Admin creates a staff account
- * - Admin sets the initial password and shares it with the staff member
+ * Admin sets the initial password and shares it with the staff member
  */
 export const createStaff = async (req, res) => {
   try {
