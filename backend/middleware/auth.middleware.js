@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import Staff from "../models/staff.model.js";
 import Member from "../models/member.model.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET || "suman";
 
 export const protect = async (req, res, next) => {
   let token;

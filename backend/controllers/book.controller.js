@@ -13,55 +13,38 @@ export const createBook = async (req, res, next) => {
 
 export const listBooks = async (req, res, next) => {
   try {
-    const {
-      q,
-      author,
-      genre,
-      bookimage,
-      minAvailable,
-      maxAvailable,
-      sort = "-createdAt",
-      page = 1,
-      limit = 10,
-    } = req.query;
-
-    const pageNumber  = Number(page) || 1;
-    const limitNumber = Number(limit) || 10;
-    const skip        = (pageNumber - 1) * limitNumber;
+    const { q, author, genre, minAvailable, maxAvailable, sort = "-createdAt" } = req.query;
 
     const filter = {};
 
+    // Search by text
     if (q) filter.$text = { $search: q };
+
+    // Filter by author
     if (author) filter.author = author;
+
+    // Filter by genre
     if (genre) filter.genre = genre;
+
+    // Filter by available count
     if (minAvailable || maxAvailable) {
       filter.available = {};
       if (minAvailable) filter.available.$gte = Number(minAvailable);
       if (maxAvailable) filter.available.$lte = Number(maxAvailable);
     }
 
-    const [items, total] = await Promise.all([
-      Book.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limitNumber),
-      Book.countDocuments(filter),
-    ]);
+    // Fetch all matching books without pagination
+    const items = await Book.find(filter).sort(sort);
 
     res.json({
       success: true,
       data: items,
-      pagination: {
-        total,
-        page: pageNumber,
-        pages: Math.ceil(total / limitNumber) || 1,
-        limit: limitNumber,
-      },
     });
   } catch (err) {
     next(err);
   }
 };
+
 
 export const getBookById = async (req, res, next) => {
   try {

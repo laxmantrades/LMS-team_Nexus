@@ -1,7 +1,7 @@
 import express from "express";
 
 import cors from "cors";
-import cron from "node-cron"
+import cron from "node-cron";
 import booksRouter from "./routes/book.route.js";
 import membersRouter from "./routes/member.route.js";
 import connectDatabase from "./config/database.js";
@@ -16,7 +16,12 @@ const app = express();
 
 // middleware
 configDotenv();
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // routes
@@ -27,7 +32,6 @@ app.use("/api/staff", staffRouter);
 app.use("/api/fines", finesRouter);
 app.use("/api/auth/member", memberAuthRoutes);
 app.use("/api/auth/staff", staffAuthRoutes);
-
 
 // health check
 app.get("/health", (_req, res) => res.json({ ok: true }));

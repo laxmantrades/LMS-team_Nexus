@@ -4,13 +4,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Staff from "../models/staff.model.js"; // ⬅️ adjust path if needed
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key";
+const JWT_SECRET = process.env.JWT_SECRET || "suman";
 const JWT_EXPIRES_IN = "7d";
 const SALT_ROUNDS = 10;
 
-/**
- * Helper: generate JWT token
- */
+
 const generateToken = (staff) => {
   return jwt.sign(
     {
@@ -23,15 +21,10 @@ const generateToken = (staff) => {
   );
 };
 
-/**
- * POST /api/auth/staff/create
- * Admin creates a staff account
- * - Only admin should be allowed to call this (use auth middleware to check req.user.role)
- * - Admin sets the initial password and shares it with the staff member
- */
+
 export const createStaff = async (req, res) => {
   try {
-    // Make sure only admin can create staff (requires auth middleware that sets req.user)
+  
     if (!req.user || !req.user.role?.includes("admin")) {
       return res.status(403).json({ message: "Only admin can create staff" });
     }
@@ -55,7 +48,7 @@ export const createStaff = async (req, res) => {
       full_name,
       email,
       password: hashedPassword,
-      role: ["staff"], // force staff; admins are created manually in DB
+      role: ["staff"], 
     });
 
     return res.status(201).json({
@@ -74,11 +67,7 @@ export const createStaff = async (req, res) => {
   }
 };
 
-/**
- * POST /api/auth/staff/login
- * Login for both admin and staff (they're all in Staff collection)
- * body: { email, password }
- */
+
 export const loginStaff = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -165,11 +154,7 @@ export const changeStaffPassword = async (req, res) => {
   }
 };
 
-/**
- * (Optional) Admin reset staff password without knowing old one
- * POST /api/auth/staff/:id/reset-password
- * body: { newPassword }
- */
+
 export const adminResetStaffPassword = async (req, res) => {
   try {
     if (!req.user || !req.user.role?.includes("admin")) {
