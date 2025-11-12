@@ -1,9 +1,9 @@
-// src/features/auth/authSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const API_BASE_URL = "http://localhost:4000"; // backend base URL
+const API_BASE_URL = "http://localhost:4000"; 
 
-// MEMBER SIGNUP  ---------------------------------------
+
 export const memberSignup = createAsyncThunk(
   "auth/memberSignup",
   async ({ name, email, password,address }, thunkAPI) => {
@@ -13,8 +13,8 @@ export const memberSignup = createAsyncThunk(
         headers: {
           "Content-Type": "application/json",
         },
-        // If your backend uses cookies for auth, uncomment:
-        // credentials: "include",
+        
+        credentials: "include",
         body: JSON.stringify({ name, email, password ,address}),
       });
 
@@ -22,7 +22,7 @@ export const memberSignup = createAsyncThunk(
       try {
         data = await res.json();
       } catch (_) {
-        // backend didn't return JSON
+        
       }
 
       if (!res.ok) {
@@ -31,7 +31,7 @@ export const memberSignup = createAsyncThunk(
         return thunkAPI.rejectWithValue(message);
       }
 
-      // Ensure we always have role on the client
+      
       const payload = {
         ...data,
         role: "member",
@@ -46,7 +46,7 @@ export const memberSignup = createAsyncThunk(
   }
 );
 
-// MEMBER LOGIN  ----------------------------------------
+
 export const memberLogin = createAsyncThunk(
   "auth/memberLogin",
   async ({ email, password }, thunkAPI) => {
@@ -56,8 +56,7 @@ export const memberLogin = createAsyncThunk(
         headers: {
           "Content-Type": "application/json",
         },
-        // If using cookie-based auth:
-        // credentials: "include",
+       
         body: JSON.stringify({ email, password }),
       });
 
@@ -65,7 +64,7 @@ export const memberLogin = createAsyncThunk(
       try {
         data = await res.json();
       } catch (_) {
-        // no JSON or invalid JSON
+        
       }
 
       if (!res.ok) {
@@ -88,13 +87,12 @@ export const memberLogin = createAsyncThunk(
   }
 );
 
-// STAFF LOGIN (we'll hook this up later) ----------------
+
 export const staffLogin = createAsyncThunk(
   "auth/staffLogin",
   async ({ email, password }, thunkAPI) => {
     try {
-      // TODO: later we'll change this to your real admin route
-      // For now, just fake it so the UI doesn't break.
+      
       await new Promise((resolve) => setTimeout(resolve, 800));
       return { role: "staff", email };
     } catch (err) {
@@ -105,8 +103,8 @@ export const staffLogin = createAsyncThunk(
 
 const initialState = {
   user: null,
-  token: null, // if your backend returns JWT or similar
-  status: "idle", // idle | loading | succeeded | failed
+  token: null, 
+  status: "idle", 
   error: null,
 };
 
@@ -119,8 +117,7 @@ const authSlice = createSlice({
       state.token = null;
       state.status = "idle";
       state.error = null;
-      // If you store token in localStorage, clear it here:
-      // localStorage.removeItem("authToken");
+      
     },
     resetAuthState(state) {
       state.status = "idle";
@@ -129,7 +126,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // MEMBER SIGNUP
+      
       .addCase(memberSignup.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -137,20 +134,19 @@ const authSlice = createSlice({
       .addCase(memberSignup.fulfilled, (state, action) => {
         state.status = "succeeded";
 
-        // Try to pick user + token from backend response
+       
         const payload = action.payload || {};
         state.user = payload.user || { email: payload.email, role: payload.role };
         state.token = payload.token || null;
 
-        // If you want to persist token:
-        // if (state.token) localStorage.setItem("authToken", state.token);
+       
       })
       .addCase(memberSignup.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Member signup failed.";
       })
 
-      // MEMBER LOGIN
+      
       .addCase(memberLogin.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -162,15 +158,14 @@ const authSlice = createSlice({
         state.user = payload.user || { email: payload.email, role: payload.role };
         state.token = payload.token || null;
 
-        // If you want to persist token:
-        // if (state.token) localStorage.setItem("authToken", state.token);
+       
       })
       .addCase(memberLogin.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Member login failed.";
       })
 
-      // STAFF LOGIN (still fake for now)
+      
       .addCase(staffLogin.pending, (state) => {
         state.status = "loading";
         state.error = null;

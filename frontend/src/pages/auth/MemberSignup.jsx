@@ -80,11 +80,11 @@ const MemberSignup = () => {
       highlight="Member"
       subtitle="Create your account in a few seconds."
     >
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
+      <Card className="border-white/10 bg-white backdrop-blur-xl shadow-2xl">
         <CardContent className="pt-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 ">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-gray-100">
+              <Label htmlFor="name" className="text-black">
                 Full name
               </Label>
               <Input
@@ -94,12 +94,12 @@ const MemberSignup = () => {
                 onChange={handleChange}
                 placeholder="John Doe"
                 autoComplete="name"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-100">
+              <Label htmlFor="email" className="text-black">
                 Email
               </Label>
               <Input
@@ -110,12 +110,12 @@ const MemberSignup = () => {
                 onChange={handleChange}
                 placeholder="you@example.com"
                 autoComplete="email"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-100">
+              <Label htmlFor="password" className="text-black">
                 Password
               </Label>
               <Input
@@ -126,12 +126,12 @@ const MemberSignup = () => {
                 onChange={handleChange}
                 placeholder="Create a strong password"
                 autoComplete="new-password"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-gray-100">
+              <Label htmlFor="confirmPassword" className="text-black">
                 Confirm password
               </Label>
               <Input
@@ -142,11 +142,11 @@ const MemberSignup = () => {
                 onChange={handleChange}
                 placeholder="Repeat your password"
                 autoComplete="new-password"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-gray-100">
+              <Label htmlFor="confirmPassword" className="text-black">
                 Address
               </Label>
               <Input
@@ -157,7 +157,7 @@ const MemberSignup = () => {
                 onChange={handleChange}
                 placeholder="Your address"
                 autoComplete="your-address"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
 
@@ -169,7 +169,7 @@ const MemberSignup = () => {
               </Alert>
             )}
 
-            <div className="text-xs text-gray-300">
+            <div className="text-xs text-black">
               <label className="flex items-start gap-2">
                 <Checkbox
                   id="terms"
@@ -180,14 +180,14 @@ const MemberSignup = () => {
                   I agree to the{' '}
                   <button
                     type="button"
-                    className="underline hover:text-white"
+                    className="underline hover:text-black"
                   >
                     Terms of Service
                   </button>{' '}
                   and{' '}
                   <button
                     type="button"
-                    className="underline hover:text-white"
+                    className="underline hover:text-black"
                   >
                     Privacy Policy
                   </button>
@@ -206,21 +206,21 @@ const MemberSignup = () => {
                 : 'Create Member Account'}
             </Button>
 
-            <p className="text-xs text-center text-gray-300">
+            <p className="text-xs text-center text-black">
               Already have a member account?{' '}
               <Link
                 to="/member/login"
-                className="text-indigo-300 hover:text-indigo-100 font-medium"
+                className="text-indigo-700 hover:text-indigo-100 font-medium"
               >
                 Log in
               </Link>
             </p>
 
-            <p className="text-[11px] text-center text-gray-400">
+            <p className="text-[11px] text-center text-black">
               Staff users cannot sign up here.{' '}
               <Link
                 to="/staff/login"
-                className="underline underline-offset-2 hover:text-white"
+                className="underline underline-offset-2 hover:text-black"
               >
                 Staff login
               </Link>

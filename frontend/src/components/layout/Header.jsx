@@ -24,13 +24,13 @@ const Header = () => {
     navigate("/");
   };
 
-  // Helper: check if current route matches
+  
   const isActive = (path) => location.pathname === path;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/40 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        {/* Logo / Brand */}
+       
         <Link
           to="/"
           className="text-2xl font-bold  "
@@ -38,10 +38,10 @@ const Header = () => {
           MyLibrary
         </Link>
 
-        {/* Right-side area */}
+        
         <div className="flex items-center gap-3">
           {user ? (
-            // 🔹 Logged-in state
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -90,9 +90,9 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            // 🔹 Not logged in
+            
             <>
-              {/* Member Login */}
+            
               <Button
                 asChild
                 variant={isActive("/member/login") ? "default" : "outline"}
@@ -105,7 +105,7 @@ const Header = () => {
                 <Link to="/member/login">Login</Link>
               </Button>
 
-              {/* Member Signup */}
+             
               <Button
                 asChild
                 variant={isActive("/member/signup") ? "default" : "outline"}
