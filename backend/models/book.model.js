@@ -10,6 +10,7 @@ const BookSchema = new mongoose.Schema(
     published_date: { type: Date },
     available: { type: Number, default: 0, min: 0 },
     added_on: { type: Date, default: Date.now },
+    description:{type:String}
   },
   { timestamps: true, collection: "books" }
 );

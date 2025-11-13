@@ -60,11 +60,11 @@ const StaffLogin = () => {
       highlight="Portal"
       subtitle="Authorized personnel only. Your access is monitored."
     >
-      <Card className="border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl">
+      <Card className="border-white/10 bg-white backdrop-blur-xl shadow-2xl">
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="staff-email" className="text-gray-100">
+              <Label htmlFor="staff-email" className="text-black">
                 Staff email
               </Label>
               <Input
@@ -75,12 +75,12 @@ const StaffLogin = () => {
                 onChange={handleChange}
                 placeholder="staff@company.com"
                 autoComplete="email"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="staff-password" className="text-gray-100">
+              <Label htmlFor="staff-password" className="text-black">
                 Password
               </Label>
               <Input
@@ -91,7 +91,7 @@ const StaffLogin = () => {
                 onChange={handleChange}
                 placeholder="••••••••"
                 autoComplete="current-password"
-                className="bg-transparent border-white/20 text-white placeholder:text-gray-400 focus-visible:ring-indigo-500"
+                className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
 
@@ -103,7 +103,7 @@ const StaffLogin = () => {
               </Alert>
             )}
 
-            <div className="flex items-center justify-between text-xs text-gray-300">
+            <div className="flex items-center justify-between text-xs text-black">
               <label className="flex items-center gap-2">
                 <Checkbox
                   id="staff-remember"
@@ -113,7 +113,7 @@ const StaffLogin = () => {
               </label>
               <button
                 type="button"
-                className="hover:text-white underline underline-offset-2"
+                className="hover:text-black underline underline-offset-2"
               >
                 Need help?
               </button>
@@ -127,11 +127,11 @@ const StaffLogin = () => {
               {status === 'loading' ? 'Logging in...' : 'Log in as Staff'}
             </Button>
 
-            <p className="text-[11px] text-center text-gray-400">
+            <p className="text-[11px] text-center text-black">
               Member user?{' '}
               <Link
                 to="/member/login"
-                className="underline underline-offset-2 hover:text-white"
+                className="underline underline-offset-2 hover:text-black"
               >
                 Go to member login
               </Link>
