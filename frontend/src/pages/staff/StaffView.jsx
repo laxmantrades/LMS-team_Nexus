@@ -1,4 +1,4 @@
-// src/pages/staff/StaffView.jsx
+
 import React from "react";
 import StaffDashboard from "./components/StaffDashboard";
 

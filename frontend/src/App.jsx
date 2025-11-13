@@ -1,4 +1,4 @@
-// src/App.jsx
+
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
@@ -9,7 +9,7 @@ import MemberSignup from "./pages/auth/MemberSignup";
 import StaffLogin from "./pages/auth/StaffLogin";
 import Profile from "./pages/Profile";
 
-// new imports
+
 import MemberView from "./pages/member/MemberView";
 import StaffView from "./pages/staff/StaffView";
 import BookDetail from "./pages/member/BookDetail";

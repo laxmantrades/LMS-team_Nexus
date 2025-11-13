@@ -1,4 +1,4 @@
-// src/pages/staff/components/ReservationCard.jsx
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -13,16 +13,16 @@ const ReservationCard = ({ reservation, onApproved = () => {}, onRejected = () =
   const [loadingAction, setLoadingAction] = useState(false);
   const [actionError, setActionError] = useState(null);
 
- // inside ReservationCard approve handler
+
 const approve = async () => {
     setActionError(null);
     setLoadingAction(true);
     try {
       const res = await fetch(`http://localhost:4000/api/loans/${id}/approve`, {
         method: "POST",
-        credentials: "include",           // use if cookie auth
+        credentials: "include",           
         headers: { "Content-Type": "application/json" },
-        // no body required because id is in URL
+        
       });
   
       const data = await res.json();

@@ -1,4 +1,4 @@
-// src/pages/staff/components/StaffDashboard.jsx
+
 import React from "react";
 import PendingReservations from "./PendingReservations";
 
