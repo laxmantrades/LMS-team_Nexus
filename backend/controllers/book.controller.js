@@ -17,10 +17,10 @@ export const listBooks = async (req, res, next) => {
 
     const filter = {};
 
-    // Search by text
+   
     if (q) filter.$text = { $search: q };
 
-    // Filter by author
+    
     if (author) filter.author = author;
 
     // Filter by genre

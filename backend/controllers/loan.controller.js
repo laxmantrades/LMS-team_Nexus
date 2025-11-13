@@ -5,63 +5,148 @@ import Book from "../models/book.model.js";
 import Member from "../models/member.model.js";
 import Staff from "../models/staff.model.js";
 
-const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-// Create a new loan
+
+
+const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+const addDays = (base = new Date(), days = 30) => {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+};
+
 export const createLoan = async (req, res) => {
   try {
-    const { book_id, member_id, staff_id, due_date, notes } = req.body;
+    const { book_id, notes, member_id: bodyMemberId } = req.body;
+    const user = req.user;
+    const userType = req.userType;
 
-    if (!book_id || !member_id || !due_date) {
-      return res.status(400).json({
-        success: false,
-        message: "book_id, member_id, and due_date are required",
-      });
+    if (!book_id || !isObjectId(book_id)) {
+      return res.status(400).json({ success: false, message: "Valid book_id is required" });
     }
 
-    if (!isObjectId(book_id) || !isObjectId(member_id)) {
-      return res.status(400).json({ success: false, message: "Invalid book/member ID" });
+    let member_id;
+    if (userType === "member") {
+      
+      member_id = String(user._id);
+    } else if (userType === "staff") {
+      // Staff must explicitly provide which member they are reserving for
+      if (!bodyMemberId || !isObjectId(bodyMemberId)) {
+        return res.status(400).json({ success: false, message: "member_id is required when staff creates a reservation" });
+      }
+      member_id = bodyMemberId;
+    } else {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    const book = await Book.findById(book_id);
-    const member = await Member.findById(member_id);
-    if (!book || !member) {
-      return res.status(404).json({ success: false, message: "Book or Member not found" });
+   
+    const [book, member] = await Promise.all([
+      Book.findById(book_id),
+      Member.findById(member_id),
+    ]);
+    if (!book) return res.status(404).json({ success: false, message: "Book not found" });
+    if (!member) return res.status(404).json({ success: false, message: "Member not found" });
+
+    // Prevent duplicate active reservation or borrowed for same book & member
+    const existing = await Loan.findOne({
+      book_id,
+      member_id,
+      $or: [
+        { status: { $in: [["reserved"], ["borrowed"], ["overdue"]] } }, // handles array status
+        { approved: true },
+        { pending: true, status: { $in: ["reserved"] } }
+      ]
+    });
+
+    if (existing) {
+      return res.status(409).json({ success: false, message: "You already have an active reservation/loan for this book" });
     }
 
-    if (book.available <= 0) {
-      return res.status(400).json({ success: false, message: "Book not available" });
-    }
-
-    if (staff_id && !isObjectId(staff_id)) {
-      return res.status(400).json({ success: false, message: "Invalid staff ID" });
-    }
-
+    // Create reservation: do NOT decrement availability here.
     const loan = await Loan.create({
       book_id,
       member_id,
-      staff_id,
-      due_date,
-      notes,
-      status: ["borrowed"],
+      notes: typeof notes === "string" ? notes.trim() : undefined,
+      status: ["reserved"],
+      approved: false,
+      pending: true,
+      // borrow_date/due_date will be set on approval
     });
-
-    book.available -= 1;
-    await book.save();
 
     const populated = await Loan.findById(loan._id)
       .populate("book_id", "title author genre")
-      .populate("member_id", "name email")
-      .populate("staff_id", "full_name email");
+      .populate("member_id", "name email");
 
-    res.status(201).json({ success: true, data: populated });
+    return res.status(201).json({ success: true, data: populated });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    console.error("createReservation error:", err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+export const approveLoan = async (req, res) => {
+  const session = await mongoose.startSession();
+  try {
+    const loanId = req.params.id;
+    const staffId = String(req.user._id);
+
+    if (!mongoose.Types.ObjectId.isValid(loanId)) {
+      return res.status(400).json({ success: false, message: "Invalid loan id" });
+    }
+
+    let updatedLoan;
+
+    await session.withTransaction(async () => {
+      // load reservation
+      const loan = await Loan.findById(loanId).session(session);
+      if (!loan) throw Object.assign(new Error("Reservation not found"), { status: 404 });
+
+      if (loan.approved) throw Object.assign(new Error("Reservation already approved"), { status: 400 });
+      if (!loan.status || !loan.status.includes("reserved")) {
+        throw Object.assign(new Error("Loan is not a pending reservation"), { status: 400 });
+      }
+
+      // check availability
+      const book = await Book.findById(loan.book_id).session(session);
+      if (!book) throw Object.assign(new Error("Book not found"), { status: 404 });
+      if (book.available <= 0) throw Object.assign(new Error("Book not available"), { status: 400 });
+
+      // mark loan approved and set dates
+      const now = new Date();
+      loan.borrow_date = now;
+      loan.due_date = addDays(now, 30);
+      loan.approved = true;
+      loan.pending = false;
+      loan.status = ["borrowed"];
+      loan.staff_id = staffId;
+
+      await loan.save({ session });
+
+      // decrement availability
+      book.available -= 1;
+      if (book.available < 0) book.available = 0;
+      await book.save({ session });
+
+      // reload populated
+      updatedLoan = await Loan.findById(loan._id)
+        .populate("book_id", "title author genre")
+        .populate("member_id", "name email")
+        .populate("staff_id", "full_name email")
+        .session(session);
+    }); // commit
+
+    return res.status(200).json({ success: true, data: updatedLoan });
+  } catch (err) {
+    console.error("approveReservation error:", err);
+    const status = err.status || 500;
+    return res.status(status).json({ success: false, message: err.message || "Server error" });
+  } finally {
+    session.endSession();
   }
 };
 
-// Get all loans (filtering and pagination)
+
+
+
 export const getLoans = async (req, res) => {
   try {
     const {
@@ -117,7 +202,7 @@ export const getLoans = async (req, res) => {
   }
 };
 
-// Get single loan by ID
+
 export const getLoanById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -140,7 +225,7 @@ export const getLoanById = async (req, res) => {
   }
 };
 
-// Update loan
+
 export const updateLoan = async (req, res) => {
   try {
     const { id } = req.params;

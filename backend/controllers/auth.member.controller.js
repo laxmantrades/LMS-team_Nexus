@@ -2,7 +2,7 @@ import Member from "../models/member.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-change-this";
+const JWT_SECRET = process.env.JWT_SECRET || "sumanlaxmanbibeksumitpushpa";
 
 
 const sanitizeMember = (memberDoc) => {
@@ -53,13 +53,9 @@ export const registerMember = async (req, res) => {
 export const loginMember = async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
     const member = await Member.findOne({ email });
@@ -73,24 +69,29 @@ export const loginMember = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: member._id, email: member.email, type: "member" },
+      { id: member._id, email: member.email, accountType: "member" },
       JWT_SECRET,
       { expiresIn: "7d" }
     );
 
+   
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,     
+      sameSite: "Lax",   
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    });
+
     return res.status(200).json({
+      success: true,
       message: "Login successful",
-      token,
       member: sanitizeMember(member),
     });
   } catch (err) {
     console.error("loginMember error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-
 
 export const changeMemberPassword = async (req, res) => {
   try {

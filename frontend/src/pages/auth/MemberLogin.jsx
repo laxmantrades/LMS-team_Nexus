@@ -27,8 +27,8 @@ const MemberLogin = () => {
   const user = useSelector(selectAuthUser);
 
   const [form, setForm] = useState({
-    email: "",
-    password: "",
+    email: "pushpa@gmail.com",
+    password: "password1234",
   });
 
   useEffect(() => {

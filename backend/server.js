@@ -11,18 +11,23 @@ import finesRouter from "./routes/fine.route.js";
 import memberAuthRoutes from "./routes/auth.member.route.js";
 import staffAuthRoutes from "./routes/auth.staff.route.js";
 import { configDotenv } from "dotenv";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 // middleware
 configDotenv();
+
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
+app.use(cookieParser());
 
 // routes
 app.use("/api/loans", loansRouter);

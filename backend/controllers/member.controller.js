@@ -1,16 +1,16 @@
-// controllers/members.controller.js
+
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import Member from "../models/member.model.js";
 
 const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-// Create a new member 
+
 export const createMember = async (req, res) => {
   try {
     const { name, email, address, password, expiry_date } = req.body;
 
-    // Check for existing email
+    
     const existing = await Member.findOne({ email });
     if (existing) {
       return res
@@ -18,7 +18,7 @@ export const createMember = async (req, res) => {
         .json({ success: false, message: "Email already exists" });
     }
 
-    // Hash password
+  
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const member = await Member.create({
@@ -40,13 +40,13 @@ export const createMember = async (req, res) => {
   }
 };
 
-// Get all members
+
 export const getMembers = async (req, res) => {
   try {
     const {
       page = 1,
       limit = 10,
-      q, // search
+      q, 
       active,
     } = req.query;
 
@@ -83,7 +83,7 @@ export const getMembers = async (req, res) => {
   }
 };
 
-// Get a single member by ID
+
 export const getMemberById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -104,7 +104,7 @@ export const getMemberById = async (req, res) => {
   }
 };
 
-// Update member 
+ 
 export const updateMember = async (req, res) => {
   try {
     const { id } = req.params;
@@ -135,7 +135,7 @@ export const updateMember = async (req, res) => {
   }
 };
 
-// Delete member
+
 export const deleteMember = async (req, res) => {
   try {
     const { id } = req.params;

@@ -19,9 +19,9 @@ const StaffSchema = new mongoose.Schema(
       // NOTE: store only the bcrypt hash here, never plain text LL
     },
     role: {
-      type: [String],
-      enum: ["admin", "staff"],
-      default: ["staff"],
+      type: String,
+   
+      default: "staff",
     },
     hired_on: { type: Date, default: Date.now },
     active: { type: Boolean, default: true },

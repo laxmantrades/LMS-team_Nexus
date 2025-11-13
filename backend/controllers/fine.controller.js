@@ -4,7 +4,7 @@ import Loan from "../models/loan.model.js";
 
 const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
-// ---- Configurable policy ----
+
 const BASE_FINE = Number(process.env.FINE_BASE_AMOUNT || 10); 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -14,17 +14,13 @@ function daysOverdue(loan) {
   return Math.max(0, diffDays);
 }
 
-// Multiplier rules (unbounded):
-// Overdue 1–30 days => 1×
-// Overdue 31–60 days => 2×
-// Overdue 61–90 days => 3×
-// ...
+
 function multiplierForOverdue(overdueDays) {
   if (overdueDays <= 0) return 0;
   return Math.ceil(overdueDays / 30);
 }
 
-// Create/Update a single fine for a given loan based on overdue age
+
 export async function upsertFineForLoan(loan) {
   const overdue = daysOverdue(loan);
   const mult = multiplierForOverdue(overdue);
@@ -32,25 +28,25 @@ export async function upsertFineForLoan(loan) {
 
   const amount_due = BASE_FINE * mult;
 
-  // Exactly one fine per loan (consider a unique index on Fine.loan_id)
+  
   const existing = await Fine.findOne({ loan_id: loan._id });
 
   if (!existing) {
-    // First time fine creation
+   
     return await Fine.create({
       loan_id: loan._id,
       amount_due,
       calculated_on: new Date(),
       status: "unpaid",
-      is_capped: false, // no cap in this policy
+      is_capped: false, 
       notes: `Auto-generated ${mult}x fine for ${overdue} days overdue.`,
     });
   }
 
-  // Do not modify paid fines
+  
   if (existing.status === "paid") return existing;
 
-  // Update unpaid fine to the current tier
+  
   return await Fine.findByIdAndUpdate(
     existing._id,
     {
@@ -65,15 +61,13 @@ export async function upsertFineForLoan(loan) {
   );
 }
 
-// -------- Public controllers --------
 
-// Sweep: find all overdue & unreturned loans and create/update fines
 export const sweepFines = async (_req, res) => {
   try {
     const now = new Date();
     const loans = await Loan.find({
-      due_date: { $lt: now }, // strictly past due
-      return_date: { $exists: false }, // still not returned
+      due_date: { $lt: now }, 
+      return_date: { $exists: false }, 
     }).select("_id borrow_date due_date return_date member_id book_id");
 
     const results = [];
@@ -96,14 +90,14 @@ export const sweepFines = async (_req, res) => {
   }
 };
 
-// List fines with filters
+
 export const getFines = async (req, res) => {
   try {
     const { page = 1, limit = 10, loan_id, status, member_id } = req.query;
 
     const filter = {};
     if (loan_id && isObjectId(loan_id)) filter.loan_id = loan_id;
-    if (status) filter.status = status; // status is a string: "paid" | "unpaid"
+    if (status) filter.status = status; 
 
     if (member_id && isObjectId(member_id)) {
       const memberLoans = await Loan.find({ member_id }).select("_id");
@@ -144,7 +138,7 @@ export const getFines = async (req, res) => {
   }
 };
 
-// Get single fine
+
 export const getFineById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -172,7 +166,7 @@ export const getFineById = async (req, res) => {
   }
 };
 
-// Manual recalc for one loan
+
 export const recalcFineForLoan = async (req, res) => {
   try {
     const { loanId } = req.params;
@@ -200,7 +194,7 @@ export const recalcFineForLoan = async (req, res) => {
   }
 };
 
-// Delete fine
+
 export const deleteFine = async (req, res) => {
   try {
     const { id } = req.params;

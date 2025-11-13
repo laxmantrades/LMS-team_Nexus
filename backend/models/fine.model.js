@@ -7,7 +7,7 @@ const FineSchema = new mongoose.Schema(
     loan_id: { type: ObjectId, ref: "Loan", required: true },
     amount_due: { type: Number, required: true, min: 0 },
     calculated_on: { type: Date, default: Date.now },
-    status: { type: [String], default: [] }, // e.g., ["unpaid"], ["partially_paid"], ["waived"], ["paid"]
+    status: { type: [String], default: [] }, 
     is_capped: { type: Boolean, default: false },
     notes: { type: String, trim: true }
   },

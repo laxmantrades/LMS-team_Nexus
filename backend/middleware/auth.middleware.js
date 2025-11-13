@@ -1,50 +1,44 @@
-// backend/middleware/auth.middleware.js
+
 
 import jwt from "jsonwebtoken";
 import Staff from "../models/staff.model.js";
 import Member from "../models/member.model.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "suman";
+const JWT_SECRET = process.env.JWT_SECRET || "sumanlaxmanbibeksumitpushpa";
 
 export const protect = async (req, res, next) => {
-  let token;
-
   try {
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
+    
+    let token;
+    const authHeader = req.headers.authorization || "";
+    if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+
+    
+    if (!token && req.cookies && req.cookies.token) {
+      token = req.cookies.token;
     }
 
     if (!token) {
-      return res
-        .status(401)
-        .json({ message: "No token, authorization denied" });
+      return res.status(401).json({ message: "No token, authorization denied" });
     }
 
-    // Decode token
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    let user = null;
-    let userType = null;
+    let user, userType;
+    const accountType = decoded.accountType || decoded.type || decoded.role;
+    
+    
 
-    // Prefer explicit accountType
-    if (decoded.accountType === "staff") {
+    if (accountType === "staff" || accountType === "admin") {
       user = await Staff.findById(decoded.id).select("-password");
+    
+      
       userType = "staff";
-    } else if (decoded.accountType === "member") {
+    } else {
       user = await Member.findById(decoded.id).select("-password");
       userType = "member";
-    } else {
-      // Fallback: try both collections if accountType missing
-      user = await Staff.findById(decoded.id).select("-password");
-      if (user) {
-        userType = "staff";
-      } else {
-        user = await Member.findById(decoded.id).select("-password");
-        if (user) userType = "member";
-      }
     }
 
     if (!user) {
@@ -52,14 +46,13 @@ export const protect = async (req, res, next) => {
     }
 
     req.user = user;
-    req.userType = userType; // for later checks (like staffOnly/memberOnly)
+    req.userType = userType;
     next();
-  } catch (error) {
-    console.error("Auth middleware error:", error.message);
+  } catch (err) {
+    console.error("Auth middleware error:", err.message);
     return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
-
 
 export const adminOnly = (req, res, next) => {
   if (!req.user || req.userType !== "staff") {
@@ -73,14 +66,14 @@ export const adminOnly = (req, res, next) => {
   next();
 };
 
-
 export const staffOnly = (req, res, next) => {
-  if (!req.user || req.userType !== "staff") {
+  console.log(req.user.role=="staff");
+  
+  if (req.user.role  !== "staff") {
     return res.status(403).json({ message: "Access denied: Staff only" });
   }
   next();
 };
-
 
 export const memberOnly = (req, res, next) => {
   if (!req.user || req.userType !== "member") {
