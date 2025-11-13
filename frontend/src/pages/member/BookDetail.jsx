@@ -38,6 +38,7 @@ const BookDetail = () => {
         setLoading(false);
       }
     };
+    
 
     if (id) fetchBook();
   }, [id]);
