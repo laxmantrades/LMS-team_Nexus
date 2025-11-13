@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import ReservationCard from "./ReservationCard";
 
-const API_BASE = "http://localhost:4000/api"; // adjust as needed
+const API_BASE = "http://localhost:4000/api"; 
 
 const PendingReservations = () => {
   const [reservations, setReservations] = useState([]);
@@ -12,15 +12,15 @@ const PendingReservations = () => {
     setLoading(true);
     setError(null);
     try {
-      // Adjust endpoint if your backend uses a different query param
+      
       const res = await fetch(`${API_BASE}/loans?status=reserved&pending=true`, {
-        credentials: "include", // cookie auth
+        credentials: "include", 
       });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data?.message || "Failed to load reservations");
       }
-      // Expecting data.data or plain array
+      
       setReservations(data.data ?? data);
     } catch (err) {
       console.error("fetchPending error:", err);
@@ -32,9 +32,7 @@ const PendingReservations = () => {
 
   useEffect(() => {
     fetchPending();
-    // you can poll every X seconds if you want live updates:
-    // const interval = setInterval(fetchPending, 30000);
-    // return () => clearInterval(interval);
+    
   }, [fetchPending]);
 
   const removeReservationFromList = (id) => {

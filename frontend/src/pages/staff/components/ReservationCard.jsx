@@ -12,16 +12,14 @@ const ReservationCard = ({ reservation, onApproved = () => {}, onRejected = () =
   const [loadingAction, setLoadingAction] = useState(false);
   const [actionError, setActionError] = useState(null);
 
- // inside ReservationCard approve handler
 const approve = async () => {
     setActionError(null);
     setLoadingAction(true);
     try {
       const res = await fetch(`http://localhost:4000/api/loans/${id}/approve`, {
         method: "POST",
-        credentials: "include",           // use if cookie auth
+        credentials: "include",      
         headers: { "Content-Type": "application/json" },
-        // no body required because id is in URL
       });
   
       const data = await res.json();
@@ -41,13 +39,11 @@ const approve = async () => {
     setActionError(null);
     setLoadingAction(true);
     try {
-      // You might implement either a delete or a reject endpoint - adjust as needed.
-      // Using POST /api/loans/:id/reject for semantic clarity:
       const res = await fetch(`${API_BASE}/loans/${id}/reject`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        // optionally send reason in body
+        
         body: JSON.stringify({ reason: "Rejected by staff" }),
       });
       const data = await res.json();
