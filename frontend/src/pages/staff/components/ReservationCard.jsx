@@ -35,7 +35,6 @@ const approve = async () => {
     }
   };
   
-
   const reject = async () => {
     const confirm = window.confirm("Reject this reservation? This cannot be undone.");
     if (!confirm) return;
