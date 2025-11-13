@@ -3,18 +3,18 @@ import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const API_HOST = "http://localhost:4000/api"; 
+const API_HOST = "http://localhost:4000/api"; // change if needed
 
 const BookDetail = () => {
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  
+  // Reservation UI state
   const [notes, setNotes] = useState("");
   const [reserving, setReserving] = useState(false);
   const [message, setMessage] = useState(null);
-  const [reservation, setReservation] = useState(null); 
+  const [reservation, setReservation] = useState(null); // hold created reservation if returned
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -23,7 +23,7 @@ const BookDetail = () => {
         const res = await fetch(`${API_HOST}/books/${id}`);
         const data = await res.json();
         if (res.ok && (data.success === undefined || data.success === true)) {
-   
+          // Accept APIs that return { success: true, data: ... } OR direct { ... }
           setBook(data.data ?? data);
         } else {
           setBook(null);
@@ -38,7 +38,6 @@ const BookDetail = () => {
         setLoading(false);
       }
     };
-    
 
     if (id) fetchBook();
   }, [id]);
@@ -53,7 +52,7 @@ const BookDetail = () => {
       const res = await fetch("http://localhost:4000/api/loans/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // 
+        credentials: "include", // ✅ sends the cookie automatically
         body: JSON.stringify({
           book_id: id,
           notes: notes || undefined,
