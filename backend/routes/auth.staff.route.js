@@ -27,6 +27,7 @@ router.post("/create", /*protect, adminOnly,*/ createStaff);
 router.post("/change-password", protect, staffOnly, changeStaffPassword);
 
 // Admin resets a staff password
+//Todo reset password
 router.post(
   "/staff/:id/reset-password",
   protect,

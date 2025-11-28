@@ -178,19 +178,21 @@ const MemberSignup = () => {
                 />
                 <span>
                   I agree to the{' '}
-                  <button
+                 <Link to={"/termsandconditions"}> <button
                     type="button"
-                    className="underline hover:text-black"
+                    className="underline hover:text-black cursor-pointer"
                   >
                     Terms of Service
-                  </button>{' '}
+                  </button></Link>
                   and{' '}
+                  <Link to={"/privacy"}>
                   <button
                     type="button"
-                    className="underline hover:text-black"
+                    className="underline hover:text-black cursor-pointer"
                   >
                     Privacy Policy
                   </button>
+                  </Link>
                   .
                 </span>
               </label>

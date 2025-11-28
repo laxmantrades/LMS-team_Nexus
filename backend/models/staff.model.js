@@ -16,12 +16,17 @@ const StaffSchema = new mongoose.Schema(
       type: String,
       required: true,
       minlength: [6, "Password must be at least 6 characters long"],
-      // NOTE: store only the bcrypt hash here, never plain text LL
+      
     },
     role: {
       type: String,
    
       default: "staff",
+    },
+    address:{
+      type: String,
+   
+      default: "",
     },
     hired_on: { type: Date, default: Date.now },
     active: { type: Boolean, default: true },

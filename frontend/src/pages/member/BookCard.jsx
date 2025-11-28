@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { Button } from "./ui/button";
+import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import React from "react";
 
 const BookCard = ({ book }) => {
-  
   const truncateDescription = (text, wordLimit = 20) => {
     if (!text) return "";
     const words = text.split(" ");
@@ -15,7 +14,6 @@ const BookCard = ({ book }) => {
 
   return (
     <Card className="border-gray-200 bg-white shadow-sm">
-    
       {book?.bookImage && (
         <img
           src={book.bookImage}
@@ -25,10 +23,11 @@ const BookCard = ({ book }) => {
       )}
 
       <CardContent className="p-4 flex flex-col gap-2">
-        
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">{book.title}</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {book.title}
+            </h3>
             <p className="text-sm text-gray-600">by {book.author}</p>
             {book.genre && (
               <p className="text-sm text-gray-500 mt-1">Genre: {book.genre}</p>
@@ -49,14 +48,12 @@ const BookCard = ({ book }) => {
           </div>
         </div>
 
-       
         {book.description && (
           <p className="text-sm text-gray-700 mt-1">
             {truncateDescription(book.description, 20)}
           </p>
         )}
 
-      
         <div className="mt-2 flex items-center gap-2">
           <Button asChild variant="outline" className="text-sm flex-1">
             <Link to={`/books/${book._id}`}>View</Link>
@@ -66,7 +63,9 @@ const BookCard = ({ book }) => {
             className="text-sm flex-1"
             size="sm"
           >
-            {book.available > 0 ? "Reserve" : "Notify me"}
+            <Link to={`/books/${book._id}`}>
+              {book.available > 0 ? "Reserve" : "Notify me"}
+            </Link>
           </Button>
         </div>
       </CardContent>

@@ -145,6 +145,15 @@ const authSlice = createSlice({
       state.status = "idle";
       state.error = null;
     },
+    // NEW: set user (update ui + persist)
+    setUser(state, action) {
+      state.user = action.payload || null;
+      if (action.payload) {
+        localStorage.setItem("auth_user", JSON.stringify(action.payload));
+      } else {
+        localStorage.removeItem("auth_user");
+      }
+    },
   },
   extraReducers: (builder) => {
     // memberSignup
@@ -188,9 +197,13 @@ const authSlice = createSlice({
       .addCase(staffLogin.fulfilled, (state, action) => {
         state.status = "succeeded";
         const staff = action.payload?.staff || null;
+        ///TODO staff as admin or staff 
+        console.log(staff);
+        
         state.user = staff ? { ...staff, role: staff.role || "staff" } : null;
         if (staff) localStorage.setItem("auth_user", JSON.stringify(state.user));
       })
+
       .addCase(staffLogin.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Staff login failed.";
@@ -213,7 +226,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearAuthState, resetAuthState } = authSlice.actions;
+export const { clearAuthState, resetAuthState ,setUser} = authSlice.actions;
 
 export const selectAuthUser = (state) => state.auth.user;
 export const selectAuthStatus = (state) => state.auth.status;

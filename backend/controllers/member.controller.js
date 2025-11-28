@@ -107,31 +107,88 @@ export const getMemberById = async (req, res) => {
  
 export const updateMember = async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!isObjectId(id)) {
-      return res.status(400).json({ success: false, message: "Invalid ID" });
+    const memberId = req.user?._id;
+
+    if (!isObjectId(memberId)) {
+      return res.status(400).json({ success: false, message: "Invalid member ID" });
     }
 
-    const updates = { ...req.body };
+    const { oldPassword, newPassword, password, ...otherFields } = req.body;
 
-    if (updates.password) {
-      updates.password = await bcrypt.hash(updates.password, 10);
+    // --- PASSWORD CHANGE branch (must provide oldPassword + newPassword) ---
+    if (oldPassword || newPassword || password) {
+      // If client used "password" property, reject because we require oldPassword
+      if (password && (!oldPassword || !newPassword)) {
+        return res.status(400).json({
+          success: false,
+          message: "To change password, provide oldPassword and newPassword (do not use 'password' alone).",
+        });
+      }
+
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          message: "Both oldPassword and newPassword are required to change password.",
+        });
+      }
+
+      if (typeof newPassword !== "string" || newPassword.length < 6) {
+        return res.status(400).json({
+          success: false,
+          message: "New password must be a string of at least 6 characters.",
+        });
+      }
+
+      // Load member and verify old password
+      const member = await Member.findById(memberId).select("+password"); // ensure password is returned
+      if (!member) {
+        return res.status(404).json({ success: false, message: "Member not found" });
+      }
+
+      const isMatch = await bcrypt.compare(oldPassword, member.password);
+      if (!isMatch) {
+        return res.status(401).json({ success: false, message: "Current password is incorrect" });
+      }
+
+      // Hash and save new password
+      member.password = await bcrypt.hash(newPassword, 10);
+      // Also apply any other safe updates passed in otherFields (optional)
+      // but be careful: we usually separate password change from profile update for clarity
+      Object.keys(otherFields).forEach((k) => {
+        // prevent updating guarded fields
+        if (["email", "_id", "role", "createdAt", "updatedAt"].includes(k)) return;
+        member[k] = otherFields[k];
+      });
+
+      await member.save();
+
+      const sanitized = member.toObject();
+      delete sanitized.password;
+
+      return res.json({ success: true, message: "Password changed", data: sanitized });
     }
 
-    const member = await Member.findByIdAndUpdate(id, updates, {
+    // --- PROFILE UPDATE branch (no password change) ---
+    // Prevent updating restricted/sensitive fields
+    const forbidden = ["_id", "role", "createdAt", "updatedAt", "password"];
+    forbidden.forEach((f) => delete otherFields[f]);
+
+    // Optionally you may want to prevent email change here or handle it with verification flow
+    // delete otherFields.email;
+
+    const updated = await Member.findByIdAndUpdate(memberId, otherFields, {
       new: true,
       runValidators: true,
     }).select("-password");
 
-    if (!member) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Member not found" });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Member not found" });
     }
 
-    res.json({ success: true, data: member });
+    return res.json({ success: true, data: updated });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error("updateMember error:", err);
+    return res.status(500).json({ success: false, message: err.message || "Server error" });
   }
 };
 

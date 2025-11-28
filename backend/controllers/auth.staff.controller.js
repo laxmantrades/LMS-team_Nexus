@@ -82,6 +82,7 @@ export const loginStaff = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, staff.password);
     if (!isMatch) {
+      // TODO: increment failed login counter for lockout/rate-limiting
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
@@ -90,14 +91,15 @@ export const loginStaff = async (req, res) => {
     // set the cookie (httpOnly)
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", 
-      sameSite: "Lax", 
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax", // consider 'Strict' if you can; use 'None' + secure if cross-site
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     return res.status(200).json({
-      message: "Login successful",
-      staff: {
+      success: true,
+      data: {
         id: staff._id,
         full_name: staff.full_name,
         email: staff.email,
@@ -110,6 +112,7 @@ export const loginStaff = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 
 
 export const changeStaffPassword = async (req, res) => {

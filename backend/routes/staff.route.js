@@ -7,16 +7,17 @@ import {
   updateStaff,
   deleteStaff,
 } from "../controllers/staff.controller.js";
+import { adminOnly, protect, staffOnly } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
 // /api/staff
 router.get("/", getStaff);
-router.post("/", createStaff);
+router.post("/",protect,adminOnly, createStaff);
 
 // /api/staff/:id
 router.get("/:id", getStaffById);
-router.patch("/:id", updateStaff);
-router.delete("/:id", deleteStaff);
+router.patch("/update",protect,staffOnly, updateStaff);
+router.delete("/:id",adminOnly, deleteStaff);
 
 export default router;

@@ -10,8 +10,13 @@ import loansRouter from "./routes/loan.route.js";
 import finesRouter from "./routes/fine.route.js";
 import memberAuthRoutes from "./routes/auth.member.route.js";
 import staffAuthRoutes from "./routes/auth.staff.route.js";
+import paymentRoutes from "./routes/payment.route.js";
 import { configDotenv } from "dotenv";
 import cookieParser from "cookie-parser";
+
+import { sweepFines } from "./controllers/fine.controller.js";
+
+
 
 const app = express();
 
@@ -26,6 +31,24 @@ app.use(
   })
 );
 
+
+// make sure mongoose is connected before this
+
+// Run every night at 02:00
+cron.schedule("0 2 * * *", async () => {
+  try {
+    console.log("[CRON] Running fine sweep job...");
+    const result = await sweepFines();
+    console.log("[CRON] Fine sweep result:", {
+      processed_loans: result.processed_loans,
+      updated_fines: result.updated_fines,
+    });
+  } catch (err) {
+    console.error("[CRON] Fine sweep failed:", err);
+  }
+});
+
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -37,6 +60,7 @@ app.use("/api/staff", staffRouter);
 app.use("/api/fines", finesRouter);
 app.use("/api/auth/member", memberAuthRoutes);
 app.use("/api/auth/staff", staffAuthRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // health check
 app.get("/health", (_req, res) => res.json({ ok: true }));
