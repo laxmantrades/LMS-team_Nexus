@@ -1,12 +1,17 @@
 import { Router } from "express";
 import {
-  getFines,
-  getFineById,
+  
+
   sweepFines,
   recalcFineForLoan,
 
   deleteFine,
+
+  getMyFines,
+  getFinesByEmail,
+  getUnpaidFines,
 } from "../controllers/fine.controller.js";
+import { protect, staffOnly } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -17,16 +22,17 @@ const router = Router();
 // Manual sweep (optional admin trigger, but cron already does this nightly)
 router.post("/sweep", sweepFines);
 
-// Manual recalc for a specific loan (if data corrected)
-router.post("/recalc/:loanId", recalcFineForLoan);
+
+router.get("/search-by-email", protect,staffOnly, getFinesByEmail);
+router.get("/unpaid", protect, getUnpaidFines);
 
 // ---------------------------
 // 🔍 PUBLIC / ADMIN ROUTES
 // ---------------------------
 
 // List and view fines
-router.get("/", getFines);
-router.get("/:id", getFineById);
+//router.get("/", getFines);
+router.get("/myfines",protect, getMyFines);
 
 
 

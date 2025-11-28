@@ -52,6 +52,7 @@ const StaffLogin = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(staffLogin(form));
+    navigate('/staff/dashboard');
   };
 
   return (

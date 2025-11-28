@@ -1,12 +1,48 @@
 
 import Book from "../models/book.model.js";
 
-/** Create */
+
 export const createBook = async (req, res, next) => {
   try {
-    const book = await Book.create(req.body);
-    res.status(201).json({ success: true, data: book });
+    const {
+      title,
+      author,
+      genre,
+      bookImage,
+      published_date,
+      available,
+      description
+    } = req.body;
+
+    
+    if (!title || !author) {
+      return res.status(400).json({ success: false, message: 'Title and author are required.' });
+    }
+
+    
+    const existing = await Book.findOne({ title: title.trim(), author: author.trim() });
+    if (existing) {
+      return res.status(409).json({ success: false, message: 'A book with the same title and author already exists.' });
+    }
+
+    const bookData = {
+      title: title,
+      author: author,
+      genre: genre ? genre : undefined,
+      bookImage: bookImage || undefined,
+      published_date: published_date ? new Date(published_date) : undefined,
+      available: typeof available !== 'undefined' ? Math.max(0, parseInt(available, 10) || 0) : 0,
+      description: description || undefined
+    };
+
+    const book = await Book.create(bookData);
+    return res.status(201).json({ success: true, data: book });
   } catch (err) {
+   
+    console.error('createBook error:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: err.message });
+    }
     next(err);
   }
 };
@@ -17,23 +53,23 @@ export const listBooks = async (req, res, next) => {
 
     const filter = {};
 
-    // Search by text
+   
     if (q) filter.$text = { $search: q };
 
-    // Filter by author
+    
     if (author) filter.author = author;
 
-    // Filter by genre
+   
     if (genre) filter.genre = genre;
 
-    // Filter by available count
+   
     if (minAvailable || maxAvailable) {
       filter.available = {};
       if (minAvailable) filter.available.$gte = Number(minAvailable);
       if (maxAvailable) filter.available.$lte = Number(maxAvailable);
     }
 
-    // Fetch all matching books without pagination
+   
     const items = await Book.find(filter).sort(sort);
 
     res.json({

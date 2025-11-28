@@ -7,6 +7,7 @@ import {
   updateMember,
   deleteMember,
 } from "../controllers/member.controller.js";
+import { memberOnly, protect } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.post("/", createMember);
 router.get("/:id", getMemberById);
 
 
-router.patch("/:id", updateMember);
+router.patch("/update",protect,memberOnly, updateMember);
 router.delete("/:id", deleteMember);
 
 export default router;

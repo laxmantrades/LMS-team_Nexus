@@ -12,11 +12,13 @@ import {
   adminOnly,
   staffOnly,
 } from "../middleware/auth.middleware.js";
+import { logoutUser } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
 // Login for staff/admin
 router.post("/login", loginStaff);
+router.post("/logout", logoutUser);
 
 // Only admin can create staff
 router.post("/create", /*protect, adminOnly,*/ createStaff);
@@ -25,6 +27,7 @@ router.post("/create", /*protect, adminOnly,*/ createStaff);
 router.post("/change-password", protect, staffOnly, changeStaffPassword);
 
 // Admin resets a staff password
+//Todo reset password
 router.post(
   "/staff/:id/reset-password",
   protect,

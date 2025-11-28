@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const BookSchema = new mongoose.Schema(
   {
-    // Using ObjectId for _id (Mongo default)
+   
     title: { type: String, required: true, trim: true },
     author: { type: String, required: true, trim: true },
     genre: { type: String, trim: true },

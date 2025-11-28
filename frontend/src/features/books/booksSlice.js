@@ -13,7 +13,7 @@ export const fetchBooks = createAsyncThunk(
 
 
       const text = await res.text();
-      console.log(text);
+    
       
    
 

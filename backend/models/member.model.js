@@ -10,7 +10,13 @@ const MemberSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      validate: [validator.isEmail, "Invalid email"],
+      validate:{
+        validator: function (value) {
+          return validator.isEmail(value) && !/^\d+@/.test(value);
+        },
+        message: "Email cannot start with only numbers",
+      },
+      // regular exp
     },
     address: { type: String, required: true },
     password: {
@@ -21,7 +27,7 @@ const MemberSchema = new mongoose.Schema(
     member_since: { type: Date, default: Date.now },
     expiry_date: { type: Date },
     active: { type: Boolean, default: true },
-    notes: { type: String, trim: true },
+   
   },
   { timestamps: true, collection: "members" }
 );
