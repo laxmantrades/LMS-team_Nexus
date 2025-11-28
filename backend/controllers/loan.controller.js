@@ -82,7 +82,7 @@ export const getLoans = async (req, res) => {
     if (staff_id && isObjectId(staff_id)) filter.staff_id = staff_id;
     if (book_id && isObjectId(book_id)) filter.book_id = book_id;
 
-    // Mark overdue loans dynamically
+  
     if (overdue === "true") {
       filter.due_date = { $lt: new Date() };
       filter.return_date = { $exists: false };
