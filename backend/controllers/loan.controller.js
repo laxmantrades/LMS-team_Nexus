@@ -13,110 +13,71 @@ const addDays = (base = new Date(), days = 30) => {
 };
 const ALLOWED_STATUSES = ["reserved", "borrowed", "returned", "overdue"];
 
-// Create a new loan (reservation)
+// Create a  loan
 export const createLoan = async (req, res) => {
   try {
-    const { book_id, notes, member_id: bodyMemberId } = req.body;
-    const user = req.user;
-    const userType = req.userType;
+    const { book_id, member_id, staff_id, due_date, notes } = req.body;
 
     if (!book_id || !isObjectId(book_id)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Valid book_id is required" });
+      return res.status(400).json({ success: false, message: "Valid book_id is required" });
     }
 
     let member_id;
     if (userType === "member") {
+      
       member_id = String(user._id);
     } else if (userType === "staff") {
+     
       if (!bodyMemberId || !isObjectId(bodyMemberId)) {
-        return res.status(400).json({
-          success: false,
-          message: "member_id is required when staff creates a reservation",
-        });
+        return res.status(400).json({ success: false, message: "member_id is required when staff creates a reservation" });
       }
       member_id = bodyMemberId;
     } else {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
+   
     const [book, member] = await Promise.all([
       Book.findById(book_id),
       Member.findById(member_id),
     ]);
-    if (!book) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Book not found" });
-    }
-    if (!member) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Member not found" });
-    }
-
-    const hasOverdue = await Loan.exists({
-      member_id,
-      status: "overdue",          
-      return_date: { $exists: false }, 
-    });
-
-    if (hasOverdue) {
-      return res.status(400).json({
-        success: false,
-        message:
-          "You have overdue book(s) and outstanding fines. Please visit the library to return the book(s) and pay the fine before making a new reservation.",
-      });
-    }
+    if (!book) return res.status(404).json({ success: false, message: "Book not found" });
+    if (!member) return res.status(404).json({ success: false, message: "Member not found" });
 
     
-    const ACTIVE_STATUSES = ["reserved", "borrowed", "overdue"];
-
     const existing = await Loan.findOne({
       book_id,
       member_id,
-      status: { $in: ACTIVE_STATUSES },
+      $or: [
+        { status: { $in: [["reserved"], ["borrowed"], ["overdue"]] } }, 
+        { approved: true },
+        { pending: true, status: { $in: ["reserved"] } }
+      ]
     });
-    console.log(existing);
-    
 
     if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "You already have an active reservation/loan for this book",
-        data: existing,
-      });
+      return res.status(409).json({ success: false, message: "You already have an active reservation/loan for this book" });
     }
 
-    const MAX_ACTIVE = 3;
-    const activeCount = await Loan.countDocuments({
-      member_id,
-      status: { $in: ACTIVE_STATUSES },
-    });
-
-    if (activeCount >= MAX_ACTIVE) {
-      return res.status(400).json({
-        success: false,
-        message: `Limit reached: member already has ${activeCount} active loan(s). Maximum allowed is ${MAX_ACTIVE}.`,
-      });
-    }
-
-  
+    
     const loan = await Loan.create({
       book_id,
       member_id,
       notes: typeof notes === "string" ? notes.trim() : undefined,
       status: ["reserved"],
+      approved: false,
+      pending: true,
+      
     });
 
     const populated = await Loan.findById(loan._id)
       .populate("book_id", "title author genre")
-      .populate("member_id", "name email");
+      .populate("member_id", "name email")
+      .populate("staff_id", "full_name email");
 
-    return res.status(201).json({ success: true, data: populated });
+    res.status(201).json({ success: true, data: populated });
   } catch (err) {
-    console.error("createLoan error:", err);
+    console.error("createReservation error:", err);
     return res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -500,12 +461,69 @@ export const updateLoan = async (req, res) => {
 
     return res.json({ success: true, data: populated });
   } catch (err) {
-    console.error("updateLoan error:", err);
-    if (session) {
-      try { await session.abortTransaction(); } catch (e) {}
-      try { session.endSession(); } catch (e) {}
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Approve loan
+export const approveLoan = async (req, res) => {
+  const session = await mongoose.startSession();
+  try {
+    const loanId = req.params.id;
+    const staffId = String(req.user._id);
+
+    if (!mongoose.Types.ObjectId.isValid(loanId)) {
+      return res.status(400).json({ success: false, message: "Invalid loan id" });
     }
-    return res.status(500).json({ success: false, message: err.message });
+
+    let updatedLoan;
+
+    await session.withTransaction(async () => {
+     
+      const loan = await Loan.findById(loanId).session(session);
+      if (!loan) throw Object.assign(new Error("Reservation not found"), { status: 404 });
+
+      if (loan.approved) throw Object.assign(new Error("Reservation already approved"), { status: 400 });
+      if (!loan.status || !loan.status.includes("reserved")) {
+        throw Object.assign(new Error("Loan is not a pending reservation"), { status: 400 });
+      }
+
+      
+      const book = await Book.findById(loan.book_id).session(session);
+      if (!book) throw Object.assign(new Error("Book not found"), { status: 404 });
+      if (book.available <= 0) throw Object.assign(new Error("Book not available"), { status: 400 });
+
+     
+      const now = new Date();
+      loan.borrow_date = now;
+      loan.due_date = addDays(now, 30);
+      loan.approved = true;
+      loan.pending = false;
+      loan.status = ["borrowed"];
+      loan.staff_id = staffId;
+
+      await loan.save({ session });
+
+      
+      book.available -= 1;
+      if (book.available < 0) book.available = 0;
+      await book.save({ session });
+
+     
+      updatedLoan = await Loan.findById(loan._id)
+        .populate("book_id", "title author genre")
+        .populate("member_id", "name email")
+        .populate("staff_id", "full_name email")
+        .session(session);
+    });
+
+    return res.status(200).json({ success: true, data: updatedLoan });
+  } catch (err) {
+    console.error("approveReservation error:", err);
+    const status = err.status || 500;
+    return res.status(status).json({ success: false, message: err.message || "Server error" });
+  } finally {
+    session.endSession();
   }
 };
 
