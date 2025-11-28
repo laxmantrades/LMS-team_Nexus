@@ -18,7 +18,6 @@ export const createLoan = async (req, res) => {
     const user = req.user;
     const userType = req.userType;
 
-    // Validate book_id
     if (!book_id || !isObjectId(book_id)) {
       return res
         .status(400)
