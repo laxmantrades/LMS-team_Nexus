@@ -227,7 +227,7 @@ export const recalcFineForLoan = async (req, res) => {
   }
 };
 
-
+// Delete a fine by ID
 export const deleteFine = async (req, res) => {
   try {
     const { id } = req.params;
