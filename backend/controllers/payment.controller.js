@@ -158,7 +158,7 @@ export const getMyPayments = async (req, res) => {
 
     const memberId = req.user._id;
 
-    // populate fine_id and staff info; if your Fine model populates loan->book you can go deeper
+    //populate fine_id and staff info; if your Fine model populates loan->book you can go deeper
     const payments = await paymentModel.find({ member_id: memberId })
       .populate({
         path: "fine_id",

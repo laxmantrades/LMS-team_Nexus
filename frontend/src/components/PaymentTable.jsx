@@ -9,7 +9,7 @@ const fmtDate = (d) => {
     return d;
   }
 };
-
+// PaymentsTable component
 const PaymentsTable = ({ apiBase}) => {
   const [payments, setPayments] = useState([]);
   const [totalPaid, setTotalPaid] = useState(0);
