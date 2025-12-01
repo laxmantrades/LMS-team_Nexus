@@ -1,4 +1,4 @@
-// src/pages/Profile.jsx
+// member profile component
 import React,{ useCallback, useEffect, useState,useMemo } from "react";
 import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
