@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchBooks } from "@/features/books/booksSlice";
 import BookCard from "@/pages/member/BookCard";
+//memberview page
 
 const MemberView = () => {
   const dispatch = useDispatch();
