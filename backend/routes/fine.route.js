@@ -16,10 +16,8 @@ import { protect, staffOnly } from "../middleware/auth.middleware.js";
 const router = Router();
 
 // ---------------------------
-// 🔁 ADMIN / INTERNAL ROUTES
+//  PROTECTED MEMBER ROUTES
 // ---------------------------
-
-// Manual sweep (optional admin trigger, but cron already does this nightly)
 router.post("/sweep", sweepFines);
 
 

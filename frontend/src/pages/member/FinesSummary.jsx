@@ -1,4 +1,5 @@
 import React from "react";
+//fine summary component
 const FinesSummary = ({ fineLoading, fineError, fineTotal, myFines }) => (
   <div className="mt-6 border-t border-gray-200 pt-4">
     <h3 className="text-sm font-medium text-gray-700 mb-2">Fines</h3>

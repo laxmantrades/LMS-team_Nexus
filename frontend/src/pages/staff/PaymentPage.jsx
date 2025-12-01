@@ -2,17 +2,7 @@
 import React, { useEffect, useState } from "react";
 import PaymentModal from "./components/PaymentModal";
 
-/**
- * PaymentsPage
- *
- * - if input contains "@", treat it as email and call:
- *    GET /api/fines/search-by-email?email=...&unpaidOnly=true
- * - otherwise treat as memberId and call:
- *    GET /api/fines/member/:memberId
- *
- * Expects the email endpoint to return:
- * { success: true, member: { _id, name, email }, data: [...], total_due, pagination: {...} }
- */
+// API base URL
 const API_BASE = "http://localhost:4000/api";
 
 const PaymentsPage = () => {

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const { ObjectId } = mongoose.Schema.Types;
 
+// Define Fine schema
 const FineSchema = new mongoose.Schema(
   {
     loan_id: { type: ObjectId, ref: "Loan", required: true },
