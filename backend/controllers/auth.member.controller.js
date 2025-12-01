@@ -57,6 +57,7 @@ export const registerMember = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+//login member
 
 export const loginMember = async (req, res) => {
   try {
@@ -102,6 +103,7 @@ export const loginMember = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+//change password
 
 export const changeMemberPassword = async (req, res) => {
   try {
