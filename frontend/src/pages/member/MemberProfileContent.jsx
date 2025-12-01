@@ -25,29 +25,29 @@ const fmtDate = (d) => {
 const MemberProfileContent = () => {
   const user = useSelector(selectAuthUser);
 
-  /* --- general state --- */
+  //--- loans ---
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /* --- address editing --- */
+  //--- address edit ---
   const [editingAddress, setEditingAddress] = useState(false);
   const [addressDraft, setAddressDraft] = useState(user?.address || "");
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressMessage, setAddressMessage] = useState(null);
   const [displayAddress, setDisplayAddress] = useState(user?.address || "");
 
-  /* --- password modal --- */
+  //--- password change ---
   const [pwModalOpen, setPwModalOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
   const [pwMessage, setPwMessage] = useState(null);
 
-  /* --- return action --- */
+  //--- return handling ---
   const [returningId, setReturningId] = useState(null);
 
-  /* --- fines --- */
+  //--- fines ---
   const [myFines, setMyFines] = useState([]);
   const [fineTotal, setFineTotal] = useState(0);
   const [fineLoading, setFineLoading] = useState(false);
@@ -60,7 +60,7 @@ const MemberProfileContent = () => {
     setDisplayAddress(user.address || "");
   }, [user]);
 
-  /* --- fetch loans --- */
+  //--- fetch loans --- //
   useEffect(() => {
     if (!user || user.role !== "member") return;
 
@@ -183,7 +183,7 @@ const MemberProfileContent = () => {
     }
   }, [oldPassword, newPassword]);
 
-  /* --- return handler (optimistic) --- */
+  //--- handle return --- //
   const handleReturn = useCallback(async (loan) => {
     if (!loan || !loan._id) return;
     const ok = window.confirm(`Mark "${loan.book_id?.title ?? "this book"}" as returned? This will set the loan status to \"returned\".`);

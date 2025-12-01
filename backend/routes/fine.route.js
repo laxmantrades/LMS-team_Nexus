@@ -10,6 +10,7 @@ import {
   getMyFines,
   getFinesByEmail,
   getUnpaidFines,
+  getFines,
 } from "../controllers/fine.controller.js";
 import { protect, staffOnly } from "../middleware/auth.middleware.js";
 
@@ -29,7 +30,7 @@ router.get("/unpaid", protect, getUnpaidFines);
 // ---------------------------
 
 // List and view fines
-//router.get("/", getFines);
+router.get("/", getFines);
 router.get("/myfines",protect, getMyFines);
 
 
