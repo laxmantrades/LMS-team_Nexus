@@ -37,7 +37,7 @@ const StaffLogin = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (status === 'succeeded' && user?.role === 'staff') {
+    if (status === 'succeeded' && (user?.role === 'staff' || user?.role === 'admin')) {
       navigate('/staff/dashboard');
     }
   }, [status, user, navigate]);

@@ -32,7 +32,7 @@ app.use(
 );
 
 
-// make sure mongoose is connected before this
+
 
 // Run every night at 02:00
 cron.schedule("0 2 * * *", async () => {
@@ -62,36 +62,55 @@ app.use("/api/auth/member", memberAuthRoutes);
 app.use("/api/auth/staff", staffAuthRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// health check
+// health checkk
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 // centralized error handler (last middleware)
 app.use((err, _req, res, _next) => {
   console.error(err);
-  // Handle a common Mongoose validation error shape nicely
+
+  // Mongoose ValidationError (schema validation)
   if (err.name === "ValidationError") {
+    const errors = Object.fromEntries(
+      Object.entries(err.errors).map(([k, v]) => [k, v.message])
+    );
+
     return res.status(400).json({
       success: false,
       message: "Validation failed",
-      errors: Object.fromEntries(
-        Object.entries(err.errors).map(([k, v]) => [k, v.message])
-      ),
+      errors,
     });
   }
+
+  // Mongoose CastError (e.g. invalid type like "abc" for Number)
+  if (err.name === "CastError") {
+    const errors = {
+      [err.path || "value"]: err.message,
+    };
+
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors,
+    });
+  }
+
+  // Fallback for everything else
   res.status(500).json({ success: false, message: "Server error" });
 });
+
 const port = process.env.PORT || 4000;
 
-// ✅ Schedule: run every day at 2:00 AM (server local time)
+// Schedule: run every day at 2:00 AM (server local time)
 cron.schedule(
   "0 2 * * *",
   async () => {
     console.log("⏰ Running daily fine sweep...");
     try {
       const result = await runFineSweep();
-      console.log("✅ Fine sweep completed:", result);
+      console.log(" Fine sweep completed:", result);
     } catch (err) {
-      console.error("❌ Fine sweep failed:", err);
+      console.error("Fine sweep failed:", err);
     }
   },
   { timezone: "Europe/Copenhagen" } // set the correct TZ for your environment
