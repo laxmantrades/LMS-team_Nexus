@@ -1,12 +1,11 @@
 // services/fines.service.js
 import Loan from "../models/loan.model.js";
 
-import { upsertFineForLoan } from "../controllers/fine.controller.js"; // reuse logic
+import { upsertFineForLoan } from "../controllers/fine.controller.js";
 
 export async function runFineSweep() {
   const now = new Date();
 
-  // Only loans that are overdue and not yet returned
   const loans = await Loan.find({
     due_date: { $lt: now },
     return_date: { $exists: false },

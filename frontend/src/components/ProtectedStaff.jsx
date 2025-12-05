@@ -4,13 +4,11 @@ import { useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
 import { selectAuthUser } from "@/features/auth/authSlice";
 
-/**
- * Protects routes for STAFF only.
- * If not logged in -> redirect to /staff/login
- * If logged in but not staff -> redirect to member dashboard (or login)
- */
+
 const ProtectedStaff = ({ children }) => {
   const user = useSelector(selectAuthUser);
+  
+  
   const location = useLocation();
 
   if (!user) {

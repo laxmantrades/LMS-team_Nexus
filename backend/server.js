@@ -1,7 +1,10 @@
 import express from "express";
-
 import cors from "cors";
 import cron from "node-cron";
+import cookieParser from "cookie-parser";
+import { configDotenv } from "dotenv";
+import rateLimit from "express-rate-limit"; 
+
 import booksRouter from "./routes/book.route.js";
 import membersRouter from "./routes/member.route.js";
 import connectDatabase from "./config/database.js";
@@ -11,17 +14,13 @@ import finesRouter from "./routes/fine.route.js";
 import memberAuthRoutes from "./routes/auth.member.route.js";
 import staffAuthRoutes from "./routes/auth.staff.route.js";
 import paymentRoutes from "./routes/payment.route.js";
-import { configDotenv } from "dotenv";
-import cookieParser from "cookie-parser";
-
 import { sweepFines } from "./controllers/fine.controller.js";
-
-
 
 const app = express();
 
-// middleware
+
 configDotenv();
+
 
 app.use(
   cors({
@@ -32,9 +31,32 @@ app.use(
 );
 
 
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 1000,                  
+  standardHeaders: true,     
+  legacyHeaders: false,    
+});
 
 
-// Run every night at 02:00
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 1000,                  
+  message: {
+    success: false,
+    message: "Too many attempts from this IP, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+
+app.use("/api", apiLimiter);
+
+
+app.use("/api/auth", authLimiter);
+
+
 cron.schedule("0 2 * * *", async () => {
   try {
     console.log("[CRON] Running fine sweep job...");
@@ -47,7 +69,6 @@ cron.schedule("0 2 * * *", async () => {
     console.error("[CRON] Fine sweep failed:", err);
   }
 });
-
 
 app.use(express.json());
 app.use(cookieParser());
@@ -62,19 +83,17 @@ app.use("/api/auth/member", memberAuthRoutes);
 app.use("/api/auth/staff", staffAuthRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// health checkk
+// health check
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
-// centralized error handler (last middleware)
+// centralized error handler 
 app.use((err, _req, res, _next) => {
   console.error(err);
 
-  // Mongoose ValidationError (schema validation)
   if (err.name === "ValidationError") {
     const errors = Object.fromEntries(
       Object.entries(err.errors).map(([k, v]) => [k, v.message])
     );
-
     return res.status(400).json({
       success: false,
       message: "Validation failed",
@@ -82,12 +101,10 @@ app.use((err, _req, res, _next) => {
     });
   }
 
-  // Mongoose CastError (e.g. invalid type like "abc" for Number)
   if (err.name === "CastError") {
     const errors = {
       [err.path || "value"]: err.message,
     };
-
     return res.status(400).json({
       success: false,
       message: "Validation failed",
@@ -95,26 +112,13 @@ app.use((err, _req, res, _next) => {
     });
   }
 
-  // Fallback for everything else
   res.status(500).json({ success: false, message: "Server error" });
 });
 
 const port = process.env.PORT || 4000;
 
-// Schedule: run every day at 2:00 AM (server local time)
-cron.schedule(
-  "0 2 * * *",
-  async () => {
-    console.log("⏰ Running daily fine sweep...");
-    try {
-      const result = await runFineSweep();
-      console.log(" Fine sweep completed:", result);
-    } catch (err) {
-      console.error("Fine sweep failed:", err);
-    }
-  },
-  { timezone: "Europe/Copenhagen" } // set the correct TZ for your environment
-);
+
+
 connectDatabase().then(() => {
   app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

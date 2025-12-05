@@ -27,16 +27,16 @@ export const protect = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid token payload" });
     }
 
-    // First try Staff collection (covers admin & staff)
+    
     let user = await Staff.findById(decoded.id).select("-password");
     if (user) {
-      // user.role is a string in your schema ("admin" or "staff")
+      
       req.user = user;
       req.userType = user.role === "admin" ? "admin" : "staff";
       return next();
     }
 
-    // Fallback: Member collection
+
     user = await Member.findById(decoded.id).select("-password");
     if (user) {
       req.user = user;
@@ -44,7 +44,7 @@ export const protect = async (req, res, next) => {
       return next();
     }
 
-    // Not found in either collection
+   
     return res.status(401).json({ message: "User not found or inactive" });
   } catch (err) {
     console.error("Auth middleware error:", err.message);
@@ -52,31 +52,31 @@ export const protect = async (req, res, next) => {
   }
 };
 
-// Only allow admins (user found in Staff and role === "admin")
+
+
+
 export const adminOnly = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated" });
   }
 
-  if (req.userType !== "admin") {
-    return res.status(403).json({ message: "Access denied: Admins only" });
+  if (req.user ==="member" || req.user==="staff") {
+    return res.status(403).json({ message: "Access denied: Admin only" });
   }
 
   next();
 };
-
-// Only allow staff (non-admin staff)
-export const staffOnly = (req, res, next) => {
+export const staffAndAdminOnly=(req,res,next)=>{
   if (!req.user) {
     return res.status(401).json({ message: "Not authenticated" });
   }
 
-  if (req.user ==="member") {
-    return res.status(403).json({ message: "Access denied: Staff only" });
+  if (req.user ==="member" ) {
+    return res.status(403).json({ message: "Access denied: Staff and Admin only" });
   }
 
   next();
-};
+}
 
 // Only allow members
 export const memberOnly = (req, res, next) => {

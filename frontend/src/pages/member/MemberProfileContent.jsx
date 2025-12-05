@@ -1,4 +1,4 @@
-// member profile component
+
 import React,{ useCallback, useEffect, useState,useMemo } from "react";
 import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
@@ -10,14 +10,7 @@ import PaymentsTable from "@/components/PaymentTable";
 
 const API_BASE = "http://localhost:4000/api";
 
-const fmtDate = (d) => {
-  if (!d) return "-";
-  try {
-    return new Date(d).toLocaleString();
-  } catch {
-    return d;
-  }
-};
+
 
 
 
@@ -25,42 +18,42 @@ const fmtDate = (d) => {
 const MemberProfileContent = () => {
   const user = useSelector(selectAuthUser);
 
-  //--- loans ---
+  
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  //--- address edit ---
+
   const [editingAddress, setEditingAddress] = useState(false);
   const [addressDraft, setAddressDraft] = useState(user?.address || "");
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressMessage, setAddressMessage] = useState(null);
   const [displayAddress, setDisplayAddress] = useState(user?.address || "");
 
-  //--- password change ---
+  //password change 
   const [pwModalOpen, setPwModalOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
   const [pwMessage, setPwMessage] = useState(null);
 
-  //--- return handling ---
+  //return handling 
   const [returningId, setReturningId] = useState(null);
 
-  //--- fines ---
+  //fines
   const [myFines, setMyFines] = useState([]);
   const [fineTotal, setFineTotal] = useState(0);
   const [fineLoading, setFineLoading] = useState(false);
   const [fineError, setFineError] = useState(null);
 
-  /* initialize drafts when user changes */
+
   useEffect(() => {
     if (!user) return;
     setAddressDraft(user.address || "");
     setDisplayAddress(user.address || "");
   }, [user]);
 
-  //--- fetch loans --- //
+  //fetch loans 
   useEffect(() => {
     if (!user || user.role !== "member") return;
 
@@ -85,7 +78,7 @@ const MemberProfileContent = () => {
     return () => { mounted = false; };
   }, [user]);
 
-  /* --- fetch fines --- */
+  
   useEffect(() => {
     if (!user || user.role !== "member") return;
 
@@ -120,7 +113,7 @@ const MemberProfileContent = () => {
       </div>
     );
 
-  /* --- address save --- */
+  
   const saveAddress = useCallback(async () => {
     setAddressMessage(null);
     setAddressSaving(true);
@@ -183,13 +176,13 @@ const MemberProfileContent = () => {
     }
   }, [oldPassword, newPassword]);
 
-  //--- handle return --- //
+  
   const handleReturn = useCallback(async (loan) => {
     if (!loan || !loan._id) return;
     const ok = window.confirm(`Mark "${loan.book_id?.title ?? "this book"}" as returned? This will set the loan status to \"returned\".`);
     if (!ok) return;
 
-    // optimistic update
+    
     setLoans((prev) =>
       prev.map((l) => {
         if (String(l._id) !== String(loan._id)) return l;
@@ -215,7 +208,7 @@ const MemberProfileContent = () => {
     } catch (err) {
       console.error("return error:", err);
       alert(err.message || "Server error while returning book");
-      // rollback
+      
       setLoans((prev) =>
         prev.map((l) => {
           if (String(l._id) !== String(loan._id)) return l;
@@ -230,81 +223,150 @@ const MemberProfileContent = () => {
     }
   }, []);
 
-  /* --- derived values --- */
+ 
   const loansCount = useMemo(() => loans.length, [loans]);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Profile</h1>
-            <p className="text-sm text-gray-600">Manage your account and view loans</p>
-          </div>
+    <div className="min-h-screen bg-linear-to-br from-indigo-950 via-slate-900 to-blue-950 text-slate-100 py-12 px-4">
+  <div className="max-w-4xl mx-auto">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h1 className="text-3xl font-bold text-indigo-100">Profile</h1>
+        <p className="text-sm text-slate-300">Manage your account and view loans</p>
+      </div>
 
-          <div className="space-x-2">
-            <button onClick={() => setPwModalOpen(true)} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Change password</button>
-          </div>
-        </div>
+      <div className="space-x-2">
+        <button
+          onClick={() => setPwModalOpen(true)}
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded"
+        >
+          Change password
+        </button>
+      </div>
+    </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <AccountCard user={user} onEditAddress={() => setEditingAddress(true)} displayAddress={displayAddress} />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <AccountCard user={user} onEditAddress={() => setEditingAddress(true)} displayAddress={displayAddress} />
 
-            {/* address editor (small inline area) */}
-            {editingAddress && (
-              <div className="mt-4 bg-gray-50 border border-gray-100 rounded-lg p-4">
-                <textarea value={addressDraft} onChange={(e) => setAddressDraft(e.target.value)} rows={4} className="w-full border border-gray-200 rounded p-2 text-sm mb-2" />
+       
+        {editingAddress && (
+          <div className="mt-4 bg-slate-900/70 border border-slate-700 rounded-lg p-4">
+            <textarea
+              value={addressDraft}
+              onChange={(e) => setAddressDraft(e.target.value)}
+              rows={4}
+              className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm mb-2 text-slate-100 placeholder:text-slate-500"
+            />
 
-                {addressMessage && (
-                  <div className={`mb-2 text-sm ${addressMessage.type === "error" ? "text-red-600" : "text-green-600"}`}>{addressMessage.text}</div>
-                )}
-
-                <div className="flex gap-2">
-                  <button onClick={saveAddress} disabled={addressSaving} className="px-3 py-1 bg-indigo-600 text-white rounded text-sm disabled:opacity-60">{addressSaving ? "Saving..." : "Save"}</button>
-                  <button onClick={() => { setEditingAddress(false); setAddressDraft(displayAddress || ""); setAddressMessage(null); }} className="px-3 py-1 bg-white border border-gray-200 rounded text-sm">Cancel</button>
-                </div>
+            {addressMessage && (
+              <div
+                className={`mb-2 text-sm ${
+                  addressMessage.type === "error"
+                    ? "text-rose-400"
+                    : "text-emerald-400"
+                }`}
+              >
+                {addressMessage.text}
               </div>
             )}
 
-            <FinesSummary fineLoading={fineLoading} fineError={fineError} fineTotal={fineTotal} myFines={myFines} />
+            <div className="flex gap-2">
+              <button
+                onClick={saveAddress}
+                disabled={addressSaving}
+                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-sm disabled:opacity-60"
+              >
+                {addressSaving ? "Saving..." : "Save"}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingAddress(false);
+                  setAddressDraft(displayAddress || "");
+                  setAddressMessage(null);
+                }}
+                className="px-3 py-1 bg-slate-800 border border-slate-700 rounded text-sm text-slate-200 hover:bg-slate-700"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
+        )}
 
-          <div className="md:col-span-2 bg-gray-50 border border-gray-100 rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-3">Your Loans & Reservations ({loansCount})</h2>
-            <LoansTable loans={loans} loading={loading} error={error} returningId={returningId} onReturn={handleReturn} />
-          </div>
-        
-        </div>
-        <div className="mt-4">
-  <PaymentsTable apiBase={API_BASE} />
-</div>
-
+        <FinesSummary fineLoading={fineLoading} fineError={fineError} fineTotal={fineTotal} myFines={myFines} />
       </div>
 
-      <Modal open={pwModalOpen} onClose={() => setPwModalOpen(false)} title="Change password">
-        <form onSubmit={handleChangePassword} className="space-y-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Current password</label>
-            <input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="w-full border border-gray-200 rounded p-2" />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New password</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full border border-gray-200 rounded p-2" />
-          </div>
-
-          {pwMessage && (
-            <div className={`text-sm ${pwMessage.type === "error" ? "text-red-600" : "text-green-600"}`}>{pwMessage.text}</div>
-          )}
-
-          <div className="flex justify-end gap-2 mt-2">
-            <button type="button" onClick={() => setPwModalOpen(false)} className="px-3 py-1 bg-white border border-gray-200 rounded">Cancel</button>
-            <button type="submit" disabled={pwSaving} className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-60">{pwSaving ? "Saving..." : "Change password"}</button>
-          </div>
-        </form>
-      </Modal>
+      <div className="md:col-span-2 bg-slate-900/70 border border-slate-700 rounded-lg p-4">
+        <h2 className="text-lg font-semibold mb-3 text-indigo-100">
+          Your Loans & Reservations ({loansCount})
+        </h2>
+        <LoansTable loans={loans} loading={loading} error={error} returningId={returningId} onReturn={handleReturn} />
+      </div>
     </div>
+
+    <div className="mt-4">
+      <PaymentsTable apiBase={API_BASE} />
+    </div>
+  </div>
+
+  <Modal open={pwModalOpen} onClose={() => setPwModalOpen(false)} title="Change password"  >
+    <form onSubmit={handleChangePassword} className="space-y-3">
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Current password
+        </label>
+        <input
+          type="password"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 placeholder:text-slate-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          New password
+        </label>
+        <input
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          className="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-100 placeholder:text-slate-500"
+        />
+      </div>
+
+      {pwMessage && (
+        <div
+          className={`text-sm ${
+            pwMessage.type === "error"
+              ? "text-rose-400"
+              : "text-emerald-400"
+          }`}
+        >
+          {pwMessage.text}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2 mt-2">
+        <button
+          type="button"
+          onClick={() => setPwModalOpen(false)}
+          className="px-3 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 hover:bg-slate-700"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={pwSaving}
+          className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded disabled:opacity-60"
+        >
+          {pwSaving ? "Saving..." : "Change password"}
+        </button>
+      </div>
+    </form>
+  </Modal>
+</div>
+
   );
 };
 

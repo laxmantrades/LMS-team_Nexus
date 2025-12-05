@@ -1,5 +1,6 @@
 
 import Book from "../models/book.model.js";
+import loanModel from "../models/loan.model.js";
 
 
 export const createBook = async (req, res, next) => {
@@ -31,7 +32,7 @@ export const createBook = async (req, res, next) => {
       genre: genre ? genre : undefined,
       bookImage: bookImage || undefined,
       published_date: published_date ? new Date(published_date) : undefined,
-      available: typeof available !== 'undefined' ? Math.max(0, parseInt(available, 10) || 0) : 0,
+      available: available,
       description: description || undefined
     };
 
@@ -115,12 +116,34 @@ export const updateBook = async (req, res, next) => {
 
 export const deleteBook = async (req, res, next) => {
   try {
-    const book = await Book.findByIdAndDelete(req.params.id);
-    if (!book)
+    const bookId = req.params.id;
+
+    
+    const activeLoan = await loanModel.findOne({
+      book_id: bookId,
+      status: { $in: ["borrowed", "overdue"] }, // status is an array of strings
+    }).select("_id status member_id");
+
+    if (activeLoan) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Cannot delete this book because it is currently borrowed or overdue.",
+        loan_id: activeLoan._id,
+        loan_status: activeLoan.status,
+      });
+    }
+
+    
+    const book = await Book.findByIdAndDelete(bookId);
+
+    if (!book) {
       return res
         .status(404)
         .json({ success: false, message: "Book not found" });
-    res.json({ success: true, message: "Book deleted" });
+    }
+
+    return res.json({ success: true, message: "Book deleted" });
   } catch (err) {
     next(err);
   }

@@ -1,0 +1,20 @@
+
+
+{
+  "success": true,
+  "data": {
+    "_id": "6911af382250d737b5d3e552",
+    "title": "To Kill a Mockingbird",
+    "author": "Harper Lee",
+    "genre": "Southern Gothic, Bildungsroman",
+    "bookImage": "https://covers.openlibrary.org/b/id/8225261-L.jpg",
+    "published_date": "1960-07-11T00:00:00.000Z",
+    "available": 50,
+    "description": "A powerful exploration of racial injustice and moral growth in the Deep South, told through the eyes of young Scout Finch.",
+    "added_on": "2025-11-10T09:24:08.645Z",
+    "createdAt": "2025-11-10T09:24:08.649Z",
+    "updatedAt": "2025-11-30T17:02:54.665Z",
+    "__v": 0
+  }
+}
+

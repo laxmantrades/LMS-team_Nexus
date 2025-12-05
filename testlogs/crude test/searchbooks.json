@@ -1,0 +1,21 @@
+
+
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "6911b1237913db293516d340",
+      "title": "Midnight’s Children",
+      "author": "Salman Rushdie",
+      "genre": "Magical realism, Historical fiction",
+      "bookImage": "https://covers.openlibrary.org/b/id/8375021-L.jpg",
+      "published_date": "1981-01-01T00:00:00.000Z",
+      "available": 88,
+      "description": "Children born at India’s independence share magical powers, reflecting the nation’s tumultuous birth and fractured identity. chec",
+      "added_on": "2025-11-10T09:32:19.169Z",
+      "createdAt": "2025-11-10T09:32:19.170Z",
+      "updatedAt": "2025-11-20T09:56:07.851Z",
+      "__v": 0
+    }
+  ]
+}

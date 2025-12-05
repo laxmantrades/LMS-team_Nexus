@@ -1,9 +1,9 @@
-// src/store/authSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const API_BASE_URL = "http://localhost:4000";
 
-// Helper: read persisted user
+// read persisted user
 const persistedUser = (() => {
   try {
     const raw = localStorage.getItem("auth_user");
@@ -13,7 +13,7 @@ const persistedUser = (() => {
   }
 })();
 
-// --- Thunks --------------------------------------------------
+//Thunks
 
 export const memberSignup = createAsyncThunk(
   "auth/memberSignup",
@@ -33,7 +33,7 @@ export const memberSignup = createAsyncThunk(
         return thunkAPI.rejectWithValue(message);
       }
 
-      // backend should return created member in data (and set cookie if desired)
+     
       const member = data.member || data.data || null;
       return { member };
     } catch (err) {
@@ -49,7 +49,7 @@ export const memberLogin = createAsyncThunk(
       const res = await fetch(`${API_BASE_URL}/api/auth/member/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // important for httpOnly cookie
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
 
@@ -60,7 +60,7 @@ export const memberLogin = createAsyncThunk(
         return thunkAPI.rejectWithValue(message);
       }
 
-      // backend returns { message, member } and sets cookie
+      
       const member = data.member || data.data || null;
       return { member };
     } catch (err) {
@@ -69,7 +69,7 @@ export const memberLogin = createAsyncThunk(
   }
 );
 
-// Real staff login (replace the stub)
+
 export const staffLogin = createAsyncThunk(
   "auth/staffLogin",
   async ({ email, password }, thunkAPI) => {
@@ -97,14 +97,14 @@ export const staffLogin = createAsyncThunk(
   }
 );
 
-// Logout thunk: call server to clear cookie & clear local state
+
 export const logoutUser = createAsyncThunk(
   "auth/logout",
   async (_, thunkAPI) => {
     try {
       const res = await fetch("http://localhost:4000/api/auth/member/logout", {
         method: "POST",
-        credentials: "include", // ✅ send cookie for clearing
+        credentials: "include", 
       });
 
       const data = await res.json().catch(() => ({}));
@@ -122,10 +122,10 @@ export const logoutUser = createAsyncThunk(
 );
 
 
-// --- Slice ---------------------------------------------------
+
 
 const initialState = {
-  user: persistedUser, // { id, email, role, ... } or null
+  user: persistedUser, 
   status: "idle",
   error: null,
 };
@@ -134,7 +134,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    // local-only logout (clear state & localStorage)
+    
     clearAuthState(state) {
       state.user = null;
       state.status = "idle";
@@ -145,7 +145,7 @@ const authSlice = createSlice({
       state.status = "idle";
       state.error = null;
     },
-    // NEW: set user (update ui + persist)
+    
     setUser(state, action) {
       state.user = action.payload || null;
       if (action.payload) {
@@ -164,9 +164,7 @@ const authSlice = createSlice({
       })
       .addCase(memberSignup.fulfilled, (state, action) => {
         state.status = "succeeded";
-        const member = action.payload?.member || null;
-        state.user = member ? { ...member, role: "member" } : null;
-        if (member) localStorage.setItem("auth_user", JSON.stringify(state.user));
+        
       })
       .addCase(memberSignup.rejected, (state, action) => {
         state.status = "failed";
@@ -197,10 +195,7 @@ const authSlice = createSlice({
       .addCase(staffLogin.fulfilled, (state, action) => {
         state.status = "succeeded";
         const staff = action.payload?.staff || null;
-        ///TODO staff as admin or staff 
-        console.log(staff);
-        
-        state.user = staff ? { ...staff, role: staff.role || "staff" } : null;
+         state.user = staff ? { ...staff, role: staff.role || "staff" } : null;
         if (staff) localStorage.setItem("auth_user", JSON.stringify(state.user));
       })
 
@@ -217,7 +212,7 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.status = "succeeded";
         state.user = null;
-        localStorage.removeItem("auth_user"); // clear persisted user
+        localStorage.removeItem("auth_user"); 
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.status = "failed";

@@ -1,7 +1,7 @@
-// MemberSignUpPage
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 import AuthLayout from './AuthLayout';
 
@@ -10,7 +10,6 @@ import {
   resetAuthState,
   selectAuthStatus,
   selectAuthError,
-  selectAuthUser,
 } from '../../features/auth/authSlice';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,14 +24,13 @@ const MemberSignup = () => {
   const navigate = useNavigate();
   const status = useSelector(selectAuthStatus);
   const error = useSelector(selectAuthError);
-  const user = useSelector(selectAuthUser);
 
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    address:"",
+    address: '',
   });
 
   const [localError, setLocalError] = useState(null);
@@ -41,11 +39,20 @@ const MemberSignup = () => {
     dispatch(resetAuthState());
   }, [dispatch]);
 
+  
   useEffect(() => {
-    if (status === 'succeeded' && user?.role === 'member') {
-      navigate('/member/dashboard');
+    if (status === 'succeeded') {
+      toast.success('Account created successfully. Please log in to continue.');
+      navigate('/member/login');
     }
-  }, [status, user, navigate]);
+  }, [status, navigate]);
+
+ 
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -67,7 +74,7 @@ const MemberSignup = () => {
         name: form.name,
         email: form.email,
         password: form.password,
-        address:form.address
+        address: form.address,
       })
     );
   };
@@ -145,18 +152,19 @@ const MemberSignup = () => {
                 className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-black">
+              <Label htmlFor="address" className="text-black">
                 Address
               </Label>
               <Input
-                id="Address"
+                id="address"
                 name="address"
                 type="text"
                 value={form.address}
                 onChange={handleChange}
                 placeholder="Your address"
-                autoComplete="your-address"
+                autoComplete="street-address"
                 className="bg-transparent border-white/20 text-black placeholder:text-gray-400 focus-visible:ring-indigo-500"
               />
             </div>
@@ -174,24 +182,26 @@ const MemberSignup = () => {
                 <Checkbox
                   id="terms"
                   required
-                  className="mt-[2px] border-white/40 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
+                  className="mt-0.5 border-white/40 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
                 />
                 <span>
                   I agree to the{' '}
-                 <Link to={"/termsandconditions"}> <button
-                    type="button"
-                    className="underline hover:text-black cursor-pointer"
-                  >
-                    Terms of Service
-                  </button></Link>
-                  and{' '}
-                  <Link to={"/privacy"}>
-                  <button
-                    type="button"
-                    className="underline hover:text-black cursor-pointer"
-                  >
-                    Privacy Policy
-                  </button>
+                  <Link to="/termsandconditions">
+                    <button
+                      type="button"
+                      className="underline hover:text-black cursor-pointer"
+                    >
+                      Terms of Service
+                    </button>
+                  </Link>
+                  {' '}and{' '}
+                  <Link to="/privacy">
+                    <button
+                      type="button"
+                      className="underline hover:text-black cursor-pointer"
+                    >
+                      Privacy Policy
+                    </button>
                   </Link>
                   .
                 </span>
@@ -201,7 +211,7 @@ const MemberSignup = () => {
             <Button
               type="submit"
               disabled={status === 'loading'}
-              className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/40 hover:brightness-110"
+              className="w-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/40 hover:brightness-110"
             >
               {status === 'loading'
                 ? 'Creating account...'

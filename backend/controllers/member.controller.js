@@ -49,6 +49,7 @@ export const getMembers = async (req, res) => {
       q, 
       active,
     } = req.query;
+    const filter={}
 
   
 
@@ -115,9 +116,9 @@ export const updateMember = async (req, res) => {
 
     const { oldPassword, newPassword, password, ...otherFields } = req.body;
 
-    // --- PASSWORD CHANGE branch (must provide oldPassword + newPassword) ---
+    
     if (oldPassword || newPassword || password) {
-      // If client used "password" property, reject because we require oldPassword
+      
       if (password && (!oldPassword || !newPassword)) {
         return res.status(400).json({
           success: false,
@@ -139,7 +140,7 @@ export const updateMember = async (req, res) => {
         });
       }
 
-      // Load member and verify old password
+     
       const member = await Member.findById(memberId).select("+password"); // ensure password is returned
       if (!member) {
         return res.status(404).json({ success: false, message: "Member not found" });
@@ -150,12 +151,11 @@ export const updateMember = async (req, res) => {
         return res.status(401).json({ success: false, message: "Current password is incorrect" });
       }
 
-      // Hash and save new password
+      
       member.password = await bcrypt.hash(newPassword, 10);
-      // Also apply any other safe updates passed in otherFields (optional)
-      // but be careful: we usually separate password change from profile update for clarity
+      
       Object.keys(otherFields).forEach((k) => {
-        // prevent updating guarded fields
+        
         if (["email", "_id", "role", "createdAt", "updatedAt"].includes(k)) return;
         member[k] = otherFields[k];
       });
@@ -168,13 +168,11 @@ export const updateMember = async (req, res) => {
       return res.json({ success: true, message: "Password changed", data: sanitized });
     }
 
-    // --- PROFILE UPDATE branch (no password change) ---
-    // Prevent updating restricted/sensitive fields
+    
     const forbidden = ["_id", "role", "createdAt", "updatedAt", "password"];
     forbidden.forEach((f) => delete otherFields[f]);
 
-    // Optionally you may want to prevent email change here or handle it with verification flow
-    // delete otherFields.email;
+   
 
     const updated = await Member.findByIdAndUpdate(memberId, otherFields, {
       new: true,

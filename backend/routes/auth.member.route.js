@@ -13,7 +13,7 @@ router.post("/", registerMember);
 //login member
 router.post("/login", loginMember);
 //logout user
-router.post("/logout", protect, logoutUser);
+router.post("/logout", logoutUser);
 
 router.patch("/:id/password", protect, memberOnly, changeMemberPassword);
 export default router;

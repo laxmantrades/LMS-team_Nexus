@@ -9,7 +9,7 @@ import Book from "../models/book.model.js"
 
 const router = express.Router();
 
-// create payment (staff only)
+
 
 export const createpayment = async (req, res) => {
   const { fine_id, method } = req.body;
@@ -24,7 +24,7 @@ export const createpayment = async (req, res) => {
   try {
     session.startTransaction();
 
-    // 1) load fine
+    
     const fine = await fineModel.findById(fine_id).session(session);
     if (!fine) {
       await session.abortTransaction();
@@ -40,7 +40,7 @@ export const createpayment = async (req, res) => {
         .json({ message: "This fine has no outstanding amount to pay." });
     }
 
-    // 2) determine memberId (try fine then loan)
+   
     let memberId = fine.member_id || fine.user_id || fine.user;
     let loan = null;
     if (!memberId && fine.loan_id) {
@@ -60,8 +60,7 @@ export const createpayment = async (req, res) => {
         .status(400)
         .json({ message: "Could not determine member for this fine." });
     }
-
-    // 3) create payment (amount is taken from fine)
+// 3) create payment (amount is taken from fine)
     const receiptNumber = `R-${Date.now()}-${Math.floor(Math.random() * 9000 + 1000)}`;
 
     const [payment] = await paymentModel.create(
@@ -79,8 +78,7 @@ export const createpayment = async (req, res) => {
       { session }
     );
 
-    // 4) update fine (reduce to zero and mark paid)
-    // since we're using entire amount_due, newDue becomes 0
+   
     const newDue = Math.max(0, (fine.amount_due || 0) - amt);
     fine.amount_due = newDue;
     fine.status = newDue <= 0 ? "paid" : "partial";
@@ -91,16 +89,16 @@ export const createpayment = async (req, res) => {
 
     await fine.save({ session });
 
-    // 5) update loan (mark returned) and increment book.available
+   
     if (!loan && fine.loan_id) {
       loan = await Loan.findById(fine.loan_id).session(session);
     }
 
     if (loan) {
-      // set returned status — adjust to your app's status shape if needed
+     
       loan.status = ["returned"];
       loan.return_date = new Date();
-      loan.approved = true; // optional, change if your workflow differs
+      loan.approved = true; 
       await loan.save({ session });
 
       if (loan.book_id) {
@@ -112,7 +110,7 @@ export const createpayment = async (req, res) => {
       }
     }
 
-    // commit
+  
     await session.commitTransaction();
     session.endSession();
 
@@ -122,11 +120,11 @@ export const createpayment = async (req, res) => {
       fine,
     });
   } catch (err) {
-    // rollback & cleanup
+ 
     try {
       await session.abortTransaction();
     } catch (e) {
-      // ignore
+      
     }
     session.endSession();
     console.error("createPayment error:", err);
@@ -158,7 +156,7 @@ export const getMyPayments = async (req, res) => {
 
     const memberId = req.user._id;
 
-    //populate fine_id and staff info; if your Fine model populates loan->book you can go deeper
+    
     const payments = await paymentModel.find({ member_id: memberId })
       .populate({
         path: "fine_id",
@@ -180,3 +178,38 @@ export const getMyPayments = async (req, res) => {
   }
 };
 
+// Get ALL payments in system (admin/staff)
+export const getAllPayments = async (req, res) => {
+  try {
+    const payments = await paymentModel
+      .find()
+      .populate("member_id", "name email")
+      .populate("staff_id", "full_name email")
+      .populate({
+        path: "fine_id",
+        populate: {
+          path: "loan_id",
+          populate: {
+            path: "book_id",
+            select: "title author",
+          },
+        },
+      })
+      .sort({ paid_on: -1 })
+      .lean();
+
+    const total_paid = payments.reduce(
+      (sum, p) => sum + (p.amount_paid || 0),
+      0
+    );
+
+    res.status(200).json({
+      total_records: payments.length,
+      total_paid,
+      data: payments,
+    });
+  } catch (err) {
+    console.error("getAllPayments error:", err);
+    res.status(500).json({ message: "Server error fetching payments" });
+  }
+};

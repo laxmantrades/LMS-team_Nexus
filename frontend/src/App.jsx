@@ -22,8 +22,7 @@ import Layout from "./components/layout/Layout";
 import PrivacyPolicy from "./pages/legalpages/PrivacyPolicy";
 import TermsAndConditions from "./pages/legalpages/TermsAndConditions";
 
-// Ensure your index.js (or entry) wraps <App /> with <BrowserRouter>
-// e.g. ReactDOM.render(<BrowserRouter><App /></BrowserRouter>, ...)
+
 
 const App = () => {
   return (
@@ -94,19 +93,20 @@ const App = () => {
           }
         />
 
-        {/* Staff routes: protected and using StaffLayout (sidebar + outlet) */}
+   
         <Route
           path="/staff"
           element={
             <ProtectedStaff>
+            
               <StaffLayout />
+             
             </ProtectedStaff>
           }
         >
-          {/* when user visits /staff -> redirect to /staff/dashboard */}
+     
           <Route index element={<Navigate to="dashboard" replace />} />
 
-          {/* staff sub-routes (rendered inside StaffLayout's Outlet) */}
           <Route path="dashboard" element={<StaffView />} />
           <Route path="payments" element={<PaymentsPage />} />
           <Route path="books" element={<BooksListPage />} />

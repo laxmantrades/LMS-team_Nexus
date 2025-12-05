@@ -76,7 +76,6 @@ export const createLoan = async (req, res) => {
       member_id,
       status: { $in: ACTIVE_STATUSES },
     });
-    console.log(existing);
 
     if (existing) {
       return res.status(409).json({
@@ -207,10 +206,7 @@ export const getMyLoanForBook = async (req, res) => {
     const loan = await Loan.findOne({
       book_id: bookObjectId,
       member_id: memberObjectId,
-      $or: [
-        { return_date: null },
-        { return_date: { $exists: false } }
-      ]
+      $or: [{ return_date: null }, { return_date: { $exists: false } }],
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -258,10 +254,7 @@ export const getLoans = async (req, res) => {
 
     if (overdue === "true") {
       filter.due_date = { $lt: new Date() };
-      filter.$or = [
-        { return_date: { $exists: false } },
-        { return_date: null },
-      ];
+      filter.$or = [{ return_date: { $exists: false } }, { return_date: null }];
     }
 
     const numericLimit = Math.min(Number(limit) || 10, 100);
@@ -297,7 +290,6 @@ export const getLoans = async (req, res) => {
 // Get loan by ID
 export const getLoanById = async (req, res) => {
   try {
-   
     const { id } = req.params;
     if (!isObjectId(id)) {
       return res.status(400).json({ success: false, message: "Invalid ID" });
@@ -323,12 +315,7 @@ export const getLoanById = async (req, res) => {
 // Get loans for the current member
 export const getMyLoans = async (req, res) => {
   try {
-    console.log("hi");
-    
-    
-    
     const memberId = req.user && req.user._id;
-    
 
     if (!memberId || !mongoose.Types.ObjectId.isValid(memberId)) {
       return res
@@ -362,23 +349,36 @@ export const updateLoan = async (req, res) => {
     const userType = req.userType;
 
     const loan = await Loan.findById(id);
-    if (!loan) return res.status(404).json({ success: false, message: "Loan not found" });
+    if (!loan)
+      return res
+        .status(404)
+        .json({ success: false, message: "Loan not found" });
 
     if (userType === "member" && String(loan.member_id) !== String(user._id)) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }
 
     if (updates.status) {
-      const statusArr = Array.isArray(updates.status) ? updates.status : [updates.status];
+      const statusArr = Array.isArray(updates.status)
+        ? updates.status
+        : [updates.status];
       const invalid = statusArr.some((s) => !ALLOWED_STATUSES.includes(s));
       if (invalid) {
-        return res.status(400).json({ success: false, message: "Invalid status value" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid status value" });
       }
     }
 
-    const wantsApproveTrue = updates.hasOwnProperty("approved") && updates.approved === true;
-    if (wantsApproveTrue && userType !== "staff") {
-      return res.status(403).json({ success: false, message: "Only staff can approve loans/returns" });
+    const wantsApproveTrue =
+      updates.hasOwnProperty("approved") && updates.approved === true;
+    if (wantsApproveTrue && (userType === "member")) {
+      return res
+        .status(403)
+        .json({
+          success: false,
+          message: "Only staff can approve loans/returns",
+        });
     }
 
     const incomingStatus = updates.status;
@@ -400,7 +400,8 @@ export const updateLoan = async (req, res) => {
           await book.save({ session: sessionArg });
         }
       } else {
-        loan.return_date = loan.return_date || updates.return_date || loan.return_date;
+        loan.return_date =
+          loan.return_date || updates.return_date || loan.return_date;
         loan.status = ["returned"];
         loan.approved = false;
       }
@@ -415,31 +416,48 @@ export const updateLoan = async (req, res) => {
         if (!loanForApprove) {
           await session.abortTransaction();
           session.endSession();
-          return res.status(404).json({ success: false, message: "Loan not found (during approve)" });
+          return res
+            .status(404)
+            .json({
+              success: false,
+              message: "Loan not found (during approve)",
+            });
         }
 
-        const statusArr = Array.isArray(loanForApprove.status) ? loanForApprove.status : [loanForApprove.status];
+        const statusArr = Array.isArray(loanForApprove.status)
+          ? loanForApprove.status
+          : [loanForApprove.status];
         if (statusArr.includes("returned")) {
           loanForApprove.approved = true;
           loanForApprove.staff_id = user?._id || loanForApprove.staff_id;
           await loanForApprove.save({ session });
         } else if (statusArr.includes("reserved")) {
-          const book = await Book.findById(loanForApprove.book_id).session(session);
+          const book = await Book.findById(loanForApprove.book_id).session(
+            session
+          );
           if (!book) {
             await session.abortTransaction();
             session.endSession();
-            return res.status(400).json({ success: false, message: "Book not found for loan" });
+            return res
+              .status(400)
+              .json({ success: false, message: "Book not found for loan" });
           }
           if (!book.available || book.available <= 0) {
             await session.abortTransaction();
             session.endSession();
-            return res.status(400).json({ success: false, message: "No available copies to approve loan" });
+            return res
+              .status(400)
+              .json({
+                success: false,
+                message: "No available copies to approve loan",
+              });
           }
 
           loanForApprove.status = ["borrowed"];
           loanForApprove.approved = true;
           loanForApprove.borrow_date = updates.borrow_date || new Date();
-          loanForApprove.due_date = updates.due_date || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+          loanForApprove.due_date =
+            updates.due_date || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
           loanForApprove.staff_id = user?._id || loanForApprove.staff_id;
 
           book.available = Math.max(0, (book.available || 1) - 1);
@@ -469,12 +487,16 @@ export const updateLoan = async (req, res) => {
           session.endSession();
         }
         console.error("approve (updateLoan) error:", err);
-        return res.status(400).json({ success: false, message: err.message || "Approve failed" });
+        return res
+          .status(400)
+          .json({ success: false, message: err.message || "Approve failed" });
       }
     }
 
     if (session) {
-      try { session.endSession(); } catch (e) {}
+      try {
+        session.endSession();
+      } catch (e) {}
       session = null;
     }
 
@@ -484,9 +506,11 @@ export const updateLoan = async (req, res) => {
       if (updates.status) loan.status = updates.status;
       if (updates.notes) loan.notes = updates.notes;
       if (updates.due_date) loan.due_date = updates.due_date;
-      if (typeof updates.approved === "boolean") loan.approved = updates.approved;
+      if (typeof updates.approved === "boolean")
+        loan.approved = updates.approved;
       if (updates.borrow_date) loan.borrow_date = updates.borrow_date;
-      if (updates.return_date && !loan.return_date) loan.return_date = updates.return_date;
+      if (updates.return_date && !loan.return_date)
+        loan.return_date = updates.return_date;
     }
 
     await loan.save();
@@ -500,8 +524,12 @@ export const updateLoan = async (req, res) => {
   } catch (err) {
     console.error("updateLoan error:", err);
     if (session) {
-      try { await session.abortTransaction(); } catch (e) {}
-      try { session.endSession(); } catch (e) {}
+      try {
+        await session.abortTransaction();
+      } catch (e) {}
+      try {
+        session.endSession();
+      } catch (e) {}
     }
     return res.status(500).json({ success: false, message: err.message });
   }
@@ -575,9 +603,7 @@ export const rejectLoan = async (req, res) => {
 
     const book = await Book.findById(loan.book_id);
 
-    const shouldIncrementAvailability =
-      book &&
-      (statusArr.includes("reserved"));
+    const shouldIncrementAvailability = book && statusArr.includes("reserved");
 
     if (book && shouldIncrementAvailability) {
       book.available = book.available + 1;
@@ -592,8 +618,6 @@ export const rejectLoan = async (req, res) => {
     });
   } catch (err) {
     console.error("rejectLoan error:", err);
-    return res
-      .status(500)
-      .json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

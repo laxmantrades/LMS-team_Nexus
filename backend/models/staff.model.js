@@ -10,22 +10,31 @@ const StaffSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      validate: [validator.isEmail, "Invalid email"],
+
+      validate: {
+        validator: function (value) {
+          return (
+            validator.isEmail(value) &&     
+            !/^\d/.test(value)              
+          );
+        },
+        message: "Email must not start with a number",
+      },
+      
     },
     password: {
       type: String,
       required: true,
       minlength: [6, "Password must be at least 6 characters long"],
-      
     },
     role: {
       type: String,
-   
+
       default: "staff",
     },
-    address:{
+    address: {
       type: String,
-   
+
       default: "",
     },
     hired_on: { type: Date, default: Date.now },

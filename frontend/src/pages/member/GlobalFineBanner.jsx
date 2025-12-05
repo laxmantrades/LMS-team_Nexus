@@ -1,4 +1,4 @@
-// src/components/GlobalFineBanner.jsx
+
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { selectAuthUser } from "@/features/auth/authSlice";
@@ -12,7 +12,7 @@ const GlobalFineBanner = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // If there's no user or user is not a member, clear banner and do nothing
+    
     if (!user || user.role !== "member") {
       setFineTotal(0);
       setLoading(false);
@@ -52,14 +52,14 @@ const GlobalFineBanner = () => {
 
     fetchFines();
 
-    // cleanup: abort fetch on user change / unmount
+  
     return () => controller.abort();
-  }, [user]); // <-- re-run whenever auth user changes
+  }, [user]); 
 
-  // don't render anything when loading or no outstanding fines
+ 
   if (loading) return null;
   if (!user || user.role !== "member") return null;
-  if (error) return null; // optionally render a small non-intrusive error
+  if (error) return null; 
 
   if (Number(fineTotal) > 0) {
     return (

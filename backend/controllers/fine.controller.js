@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 import Fine from "../models/fine.model.js";
 import Loan from "../models/loan.model.js";
 import Member from "../models/member.model.js"
+import { sendFineEmail } from "../services/email.service.js";
+
+
 
 const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 
@@ -22,35 +25,55 @@ function multiplierForOverdue(overdueDays) {
 }
 
 
+
+
 export async function upsertFineForLoan(loan) {
   const overdue = daysOverdue(loan);
-  
-  
+
+
   const mult = multiplierForOverdue(overdue);
-  if (mult === 0) return null; // not overdue yet
+  if (mult === 0) return null; 
 
   const amount_due = BASE_FINE * mult;
 
-  
   const existing = await Fine.findOne({ loan_id: loan._id });
 
   if (!existing) {
-   
-    return await Fine.create({
+    
+    const fine = await Fine.create({
       loan_id: loan._id,
       amount_due,
       calculated_on: new Date(),
       status: "unpaid",
-      is_capped: false, 
+      is_capped: false,
       notes: `Auto-generated ${mult}x fine for ${overdue} days overdue.`,
     });
+    
+    
+   
+    try {
+      const member = await Member.findById(loan.member_id).select("email name");
+      if (member && member.email) {
+        await sendFineEmail({
+          to: member.email,
+          memberName: member.name,
+          amount: amount_due,
+          overdueDays: overdue,
+        });
+      }
+    } catch (e) {
+      console.error("Failed to send fine email:", e);
+      
+    }
+
+    return fine;
   }
 
   
   if (existing.status === "paid") return existing;
 
-  
-  return await Fine.findByIdAndUpdate(
+  // Update existing fine
+  const updatedFine = await Fine.findByIdAndUpdate(
     existing._id,
     {
       $set: {
@@ -62,7 +85,12 @@ export async function upsertFineForLoan(loan) {
     },
     { new: true }
   );
+
+  
+
+  return updatedFine;
 }
+
 
 
 export const sweepFines = async (_req, res) => {
@@ -75,9 +103,10 @@ export const sweepFines = async (_req, res) => {
 
     const results = [];
  
-    
 
     for (const loan of loans) {
+     
+      
       const r = await upsertFineForLoan(loan);
       if (r) results.push(r);
     }
@@ -145,11 +174,11 @@ export const getFines = async (req, res) => {
 };
 
 
-// in your fines controller file
+
 
 export const getMyFines = async (req, res) => {
   try {
-    const userId = req.user?._id; // from auth middleware
+    const userId = req.user?._id; 
     
     
 
@@ -157,7 +186,7 @@ export const getMyFines = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid user ID" });
     }
 
-    // 1. Get all loans for this member
+    
     const loans = await Loan.find({ member_id: userId }).select("_id");
     const loanIds = loans.map((l) => l._id);
 
@@ -171,10 +200,10 @@ export const getMyFines = async (req, res) => {
     
     
 
-    // 2. Get all fines for these loans (you can filter unpaid only if you want)
+    
     const fines = await Fine.find({
       loan_id: { $in: loanIds },
-      // status: "unpaid", // uncomment if you only want unpaid fines
+      
     }).populate({
       path: "loan_id",
       select: "borrow_date due_date return_date member_id book_id",

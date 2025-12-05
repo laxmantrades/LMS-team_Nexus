@@ -51,54 +51,82 @@ const PaymentModal = ({ fine, onClose, onSuccess }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md p-6 z-10">
-        <h3 className="text-lg font-semibold mb-3">Record Payment</h3>
+  <div
+    className="absolute inset-0 bg-slate-950/70 backdrop-blur-sm"
+    onClick={onClose}
+  />
+  <div className="relative bg-slate-900/90 border border-slate-700 rounded-lg shadow-2xl w-full max-w-md p-6 z-10 text-slate-100">
+    <h3 className="text-lg font-semibold mb-3 text-indigo-100">
+      Record Payment
+    </h3>
 
-        <form onSubmit={submit} className="space-y-3">
-          <div>
-            <label className="block text-sm text-gray-700">Member</label>
-            <div className="text-sm">{fine.member_name || fine.member_id || "Member"}</div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700">Outstanding</label>
-            <div className="text-sm font-medium">{(fine.amount_due || 0).toFixed(2)}</div>
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700">Amount to record</label>
-            <input
-              type="number"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm text-gray-700">Method</label>
-            <select value={method} onChange={(e) => setMethod(e.target.value)} className="w-full border p-2 rounded">
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          {error && <div className="text-red-600 text-sm">{error}</div>}
-
-          <div className="flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-3 py-1 bg-white border rounded">
-              Cancel
-            </button>
-            <button type="submit" disabled={saving} className="px-3 py-1 bg-indigo-600 text-white rounded">
-              {saving ? "Saving..." : "Record Payment"}
-            </button>
-          </div>
-        </form>
+    <form onSubmit={submit} className="space-y-3">
+      <div>
+        <label className="block text-sm text-slate-300">Member</label>
+        <div className="text-sm text-slate-100">
+          {fine.member_name || fine.member_id || "Member"}
+        </div>
       </div>
-    </div>
+
+      <div>
+        <label className="block text-sm text-slate-300">Outstanding</label>
+        <div className="text-sm font-medium text-rose-300">
+          {(fine.amount_due || 0).toFixed(2)}
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm text-slate-300">
+          Amount to record
+        </label>
+        <input
+          type="number"
+          step="0.01"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="w-full border border-slate-700 bg-slate-900 text-slate-100 p-2 rounded placeholder:text-slate-500"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm text-slate-300">Method</label>
+        <select
+          value={method}
+          onChange={(e) => setMethod(e.target.value)}
+          className="w-full border border-slate-700 bg-slate-900 text-slate-100 p-2 rounded"
+        >
+          <option value="cash">Cash</option>
+          <option value="card">Card</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      {error && (
+        <div className="text-rose-400 text-sm">
+          {error}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-3 py-1 bg-slate-800 border border-slate-600 text-slate-100 rounded hover:bg-slate-700"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded disabled:opacity-60"
+        >
+          {saving ? "Saving..." : "Record Payment"}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
   );
 };
 

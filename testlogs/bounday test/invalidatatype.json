@@ -1,0 +1,9 @@
+
+
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+      "available": "Cast to Number failed for value \"abc\" (type string) at path \"available\""
+  }
+}

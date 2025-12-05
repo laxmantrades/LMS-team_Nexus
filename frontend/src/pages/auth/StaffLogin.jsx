@@ -1,4 +1,4 @@
-// src/pages/auth/StaffLogin.jsx
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,8 +28,8 @@ const StaffLogin = () => {
   const user = useSelector(selectAuthUser);
 
   const [form, setForm] = useState({
-    email: '',
-    password: '',
+    email: 'bibek@gmail.com',
+    password: 'password123',
   });
 
   useEffect(() => {
@@ -123,7 +123,7 @@ const StaffLogin = () => {
             <Button
               type="submit"
               disabled={status === 'loading'}
-              className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/40 hover:brightness-110"
+              className="w-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-500/40 hover:brightness-110"
             >
               {status === 'loading' ? 'Logging in...' : 'Log in as Staff'}
             </Button>

@@ -3,14 +3,24 @@ import validator from "validator";
 
 const MemberSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: {
+      type: String,
+      required: true,
+      maxlength: 100,
+      validate: {
+        validator: function (v) {
+          return isNaN(v);
+        },
+        message: "Name must contain letters, not numbers",
+      },
+    },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
       trim: true,
-      validate:{
+      validate: {
         validator: function (value) {
           return validator.isEmail(value) && !/^\d+@/.test(value);
         },
@@ -27,7 +37,6 @@ const MemberSchema = new mongoose.Schema(
     member_since: { type: Date, default: Date.now },
     expiry_date: { type: Date },
     active: { type: Boolean, default: true },
-   
   },
   { timestamps: true, collection: "members" }
 );

@@ -1,0 +1,17 @@
+
+
+{
+  "success": true,
+  "data": {
+    "_id": "692c84fd08b0faa4f7ca1125",
+    "title": "Harry Potter 2.0",
+    "author": "J. K. Rowling",
+    "genre": "Fantacy",
+    "published_date": "2007-07-20T22:00:00.000Z",
+    "available": 10,
+    "added_on": "2025-11-30T17:55:09.690Z",
+    "createdAt": "2025-11-30T17:55:09.693Z",
+    "updatedAt": "2025-11-30T18:07:57.234Z",
+    "__v": 0
+  }
+}

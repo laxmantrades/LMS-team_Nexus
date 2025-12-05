@@ -7,6 +7,26 @@ const isObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 export const createStaff = async (req, res) => {
   try {
     const { full_name, email, password, role, active } = req.body;
+    if( !full_name || !email){
+      return res.status(400).json({
+        success: false,
+        message: "Fullname and email is required "
+      });
+    }
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+
+    if (!nameRegex.test(full_name)) {
+      return res.status(400).json({
+        message: "Full name must contain letters only (no numbers or symbols)",
+      });
+    }
+    if (!password || password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters"
+      });
+    }
 
     const existing = await Staff.findOne({ email });
     if (existing) {
@@ -103,22 +123,21 @@ export const getStaffById = async (req, res) => {
 
 export const updateStaff = async (req, res) => {
   try {
-    // requester (from protect middleware)
+    
     const requester = req.user;
-    const requesterType = req.userType; // your middleware sets this ("staff" for staff/admin)
+    const requesterType = req.userType; 
     const allowedRoles = ["admin", "staff"];
 
-    // target id: prefer URL param (admin updating another), fall back to requester (me route)
+    
     const targetId = req.params.id || String(requester?._id);
 
     if (!isObjectId(targetId)) {
       return res.status(400).json({ success: false, message: "Invalid ID" });
     }
 
-    // convenience flags
+    
     const isSelf = requester && String(requester._id) === String(targetId);
-    // treat any staff-type user (staff or admin) as privileged for UI-level checks
-    // but we specifically detect admin below
+    
     const isStaffType = requesterType === "staff";
     const isAdmin = requester && typeof requester.role === "string"
       ? requester.role.includes("admin")
@@ -126,12 +145,12 @@ export const updateStaff = async (req, res) => {
       ? requester.role.includes("admin")
       : false;
 
-    // Separate incoming fields
+   
     const { oldPassword, newPassword, password, ...otherFields } = req.body;
 
-    // --- PASSWORD CHANGE BRANCH ---
+    
     if (oldPassword || newPassword || password) {
-      // if client used `password` shorthand, require old/new
+     
       if (password && (!oldPassword || !newPassword)) {
         return res.status(400).json({
           success: false,
@@ -140,9 +159,7 @@ export const updateStaff = async (req, res) => {
         });
       }
 
-      // Only allow:
-      // - self (staff changing own password) -> requires oldPassword verification
-      // - admin (can reset anyone) -> does NOT require oldPassword
+     
       if (!isSelf && !isAdmin) {
         return res.status(403).json({ success: false, message: "Forbidden" });
       }
@@ -154,13 +171,13 @@ export const updateStaff = async (req, res) => {
         });
       }
 
-      // load target staff doc with password to verify / update
+     
       const staffDoc = await Staff.findById(targetId).select("+password");
       if (!staffDoc) {
         return res.status(404).json({ success: false, message: "Staff not found" });
       }
 
-      // if self (not admin resetting someone else), require oldPassword match
+     
       if (!isAdmin || isSelf) {
         if (!oldPassword) {
           return res.status(400).json({
@@ -174,10 +191,10 @@ export const updateStaff = async (req, res) => {
         }
       }
 
-      // hash and set new password
+      
       staffDoc.password = await bcrypt.hash(newPassword, 10);
 
-      // optionally apply safe profile updates provided alongside password (careful)
+      
       const forbiddenFields = ["_id", "createdAt", "updatedAt", "password", "role"];
       Object.keys(otherFields).forEach((k) => {
         if (forbiddenFields.includes(k)) return;
@@ -195,18 +212,17 @@ export const updateStaff = async (req, res) => {
       });
     }
 
-    // --- PROFILE UPDATE BRANCH (no password change) ---
-    // Prevent updating restricted fields by non-admins
+   
     const forbidden = ["_id", "createdAt", "updatedAt", "password"];
     forbidden.forEach((f) => delete otherFields[f]);
 
-    // Only admins may change role or email (optional)
+   
     if (!isAdmin) {
       delete otherFields.role;
-      // delete otherFields.email; // uncomment if you want to prevent email change for non-admins
+     
     }
 
-    // If requester is not admin and not self, forbid profile updates
+    
     if (!isAdmin && !isSelf) {
       return res.status(403).json({ success: false, message: "Forbidden" });
     }

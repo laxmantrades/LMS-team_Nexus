@@ -6,12 +6,12 @@ import {
   updateBook,
   deleteBook,
 } from "../controllers/book.controller.js";
-import { adminOnly, protect, staffOnly } from "../middleware/auth.middleware.js";
+import {  protect, staffAndAdminOnly, } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-router.route("/").get(listBooks).post(protect,staffOnly,createBook);
+router.route("/").get(protect,listBooks).post(protect,staffAndAdminOnly,createBook);
 
-router.route("/:id").get(getBookById).patch(protect,staffOnly,updateBook).delete(protect,staffOnly,deleteBook);
+router.route("/:id").get(protect,getBookById).patch(protect,staffAndAdminOnly,updateBook).delete(protect,staffAndAdminOnly,deleteBook);
 
 export default router;

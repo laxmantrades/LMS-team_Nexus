@@ -4,7 +4,7 @@ export const logoutUser = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Lax",
-      path: "/",  // <-- match login cookie
+      path: "/",  
     });
 
     return res.status(200).json({

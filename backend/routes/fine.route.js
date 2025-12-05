@@ -3,7 +3,7 @@ import {
   
 
   sweepFines,
-  recalcFineForLoan,
+ 
 
   deleteFine,
 
@@ -12,30 +12,24 @@ import {
   getUnpaidFines,
   getFines,
 } from "../controllers/fine.controller.js";
-import { protect, staffOnly } from "../middleware/auth.middleware.js";
+import { protect, staffAndAdminOnly } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// ---------------------------
-//  PROTECTED MEMBER ROUTES
-// ---------------------------
+
 router.post("/sweep", sweepFines);
 
 
-router.get("/search-by-email", protect,staffOnly, getFinesByEmail);
+router.get("/search-by-email", protect,staffAndAdminOnly, getFinesByEmail);
 router.get("/unpaid", protect, getUnpaidFines);
 
-// ---------------------------
-// 🔍 PUBLIC / ADMIN ROUTES
-// ---------------------------
 
-// List and view fines
-router.get("/", getFines);
+router.get("/", protect,staffAndAdminOnly,getFines);
 router.get("/myfines",protect, getMyFines);
 
 
 
-// Delete (admin only, optional)
+
 router.delete("/:id", deleteFine);
 
 export default router;

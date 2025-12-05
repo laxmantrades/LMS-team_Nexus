@@ -1,0 +1,8 @@
+
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "available": "Path `available` (-1) is less than minimum allowed value (0)."
+  }
+}

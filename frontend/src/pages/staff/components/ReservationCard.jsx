@@ -43,13 +43,12 @@ const approve = async () => {
     setActionError(null);
     setLoadingAction(true);
     try {
-      // You might implement either a delete or a reject endpoint - adjust as needed.
-      // Using POST /api/loans/:id/reject for semantic clarity:
+      
       const res = await fetch(`${API_BASE}/loans/${id}/reject`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        // optionally send reason in body
+        
         body: JSON.stringify({ reason: "Rejected by staff" }),
       });
       const data = await res.json();
@@ -66,47 +65,72 @@ const approve = async () => {
   };
 
   return (
-    <div className="bg-white border rounded p-4 shadow-sm flex flex-col md:flex-row md:items-start gap-4">
-      <div className="flex-1">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-lg font-semibold">{book.title || "Untitled book"}</div>
-            <div className="text-sm text-gray-600">by {book.author || "Unknown"}</div>
-          </div>
-          <div className="text-sm text-gray-500">
-            Reservation ID: <span className="font-mono text-xs">{String(id).slice(-6)}</span>
-          </div>
+    <div className="bg-slate-900/80 border border-slate-800 rounded p-4 shadow-sm flex flex-col md:flex-row md:items-start gap-4">
+  <div className="flex-1">
+    <div className="flex items-start justify-between">
+      <div>
+        <div className="text-lg font-semibold text-slate-100">
+          {book.title || "Untitled book"}
         </div>
-
-        <div className="mt-3 text-sm text-gray-700">
-          <div>
-            <strong>Member:</strong> {member.name || member.full_name || "Unknown user"}{" "}
-            <span className="text-xs text-gray-400">({member.email || "no-email"})</span>
-          </div>
-          {notes && (
-            <div className="mt-2">
-              <strong>Notes:</strong>
-              <div className="mt-1 p-2 bg-gray-50 rounded text-sm text-gray-700">{notes}</div>
-            </div>
-          )}
+        <div className="text-sm text-slate-400">
+          by {book.author || "Unknown"}
         </div>
       </div>
-
-      <div className="flex-shrink-0 flex flex-col gap-2 items-end">
-        {actionError && <div className="text-sm text-red-600">{actionError}</div>}
-        <div className="flex gap-2">
-          <Button onClick={approve} disabled={loadingAction} className="min-w-[96px]">
-            {loadingAction ? "Working..." : "Approve"}
-          </Button>
-          <Button variant="destructive" onClick={reject} disabled={loadingAction} className="min-w-[96px]">
-            {loadingAction ? "Working..." : "Reject"}
-          </Button>
-        </div>
-        <div className="text-xs text-gray-400 mt-1">
-          {reservation.createdAt ? new Date(reservation.createdAt).toLocaleString() : ""}
-        </div>
+      <div className="text-sm text-slate-400 text-right">
+        Reservation ID:{" "}
+        <span className="font-mono text-xs text-slate-300">
+          {String(id).slice(-6)}
+        </span>
       </div>
     </div>
+
+    <div className="mt-3 text-sm text-slate-200">
+      <div>
+        <strong>Member:</strong> {member.name || member.full_name || "Unknown user"}{" "}
+        <span className="text-xs text-slate-400">
+          ({member.email || "no-email"})
+        </span>
+      </div>
+      {notes && (
+        <div className="mt-2">
+          <strong>Notes:</strong>
+          <div className="mt-1 p-2 bg-slate-800 rounded text-sm text-slate-200">
+            {notes}
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+
+  <div className="shrink-0 flex flex-col gap-2 items-end">
+    {actionError && (
+      <div className="text-sm text-rose-400">{actionError}</div>
+    )}
+    <div className="flex gap-2">
+      <Button
+        onClick={approve}
+        disabled={loadingAction}
+        className="min-w-24"
+      >
+        {loadingAction ? "Working..." : "Approve"}
+      </Button>
+      <Button
+        variant="destructive"
+        onClick={reject}
+        disabled={loadingAction}
+        className="min-w-24"
+      >
+        {loadingAction ? "Working..." : "Reject"}
+      </Button>
+    </div>
+    <div className="text-xs text-slate-500 mt-1">
+      {reservation.createdAt
+        ? new Date(reservation.createdAt).toLocaleString()
+        : ""}
+    </div>
+  </div>
+</div>
+
   );
 };
 

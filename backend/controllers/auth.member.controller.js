@@ -15,8 +15,27 @@ export const registerMember = async (req, res) => {
   try {
     const { name, email, address, password } = req.body;
 
+    const nameRegex = /^[A-Za-z\s]+$/;
+
+    if (!nameRegex.test(name)) {
+      return res.status(400).json({
+        message: "Full name must contain letters only (no numbers or symbols)",
+      });
+    }
     if (!name || !email || !address || !password) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+    }
+    if (password.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must not be more than 100 characters",
+      });
     }
 
     const existing = await Member.findOne({ email });

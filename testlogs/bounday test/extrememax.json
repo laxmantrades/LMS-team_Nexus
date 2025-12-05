@@ -1,0 +1,9 @@
+
+
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": {
+    "available": "Path `available` (9999) is more than maximum allowed value (1000)."
+  }
+}

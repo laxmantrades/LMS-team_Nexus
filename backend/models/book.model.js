@@ -9,7 +9,7 @@ const BookSchema = new mongoose.Schema(
     published_date: { type: Date },
     available: {
       type: Number,
-      default: 0,
+    
       min: 0,
       max: 1000,
       validate: {
